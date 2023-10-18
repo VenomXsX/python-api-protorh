@@ -11,6 +11,7 @@ app = FastAPI()
 
 db = SessionLocal()
 
+# Test route to get all events 
 @app.get("/events", response_model=List[serializers.Event])
 def GetAllEvent():
     events = db.query(Event).all()
