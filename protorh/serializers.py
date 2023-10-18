@@ -41,6 +41,7 @@ class Event(BaseModel):
     user_id: int
     department_id: int
 
+
 class EventIn(BaseModel):
     name: str
     date: NaiveDatetime

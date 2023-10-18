@@ -1,7 +1,6 @@
 from database import Base
 from sqlalchemy import Column, Integer, String, Float, DateTime, BigInteger, JSON, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY
-import datetime
 from sqlalchemy.sql import func
 
 
@@ -17,7 +16,8 @@ class User(Base):
     postal_code = Column(String, nullable=True)
     age = Column(BigInteger, nullable=True)
     meta = Column(JSON, nullable=True)
-    registration_date = Column(DateTime, server_default=func.now(), nullable=False)
+    registration_date = Column(
+        DateTime, server_default=func.now(), nullable=False)
     token = Column(String, nullable=True)
     role = Column(String, nullable=True)
 
@@ -30,7 +30,8 @@ class RequestRH(Base):
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
     content = Column(String, nullable=True)
-    registration_date = Column(DateTime, server_default=func.now(), nullable=False)
+    registration_date = Column(
+        DateTime, server_default=func.now(), nullable=False)
     visibility = Column(Boolean, nullable=True)
     close = Column(Boolean, nullable=True)
     last_action = Column(DateTime, onupdate=func.now(), nullable=True)
@@ -47,7 +48,8 @@ class Event(Base):
     date = Column(DateTime, nullable=True)
     description = Column(String, nullable=True)
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=True)
-    department_id = Column(BigInteger, ForeignKey("department.id"), nullable=True)
+    department_id = Column(BigInteger, ForeignKey(
+        "department.id"), nullable=True)
 
     class Config:
         orm_mode = True
