@@ -1,1 +1,1 @@
-python3 protorh/main.py
+python3 protorh/main.py $1

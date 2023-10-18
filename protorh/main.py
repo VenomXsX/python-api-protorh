@@ -6,7 +6,13 @@ from typing import Optional, List
 from database import SessionLocal
 from models import User, RequestRH, Event, Department
 import serializers
+import sys
 
+
+if len(sys.argv) > 1:
+    port = int(sys.argv[1])
+else:
+    port = 4242
 
 app = FastAPI()
 
@@ -20,4 +26,4 @@ def GetAllEvent():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=4242, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)
