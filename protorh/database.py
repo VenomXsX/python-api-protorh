@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 
 
-load_dotenv("protorh.env")
+load_dotenv("protorh/protorh.env")
 db_user = os.environ["DATABASE_USER"]
 db_password = os.environ["DATABASE_PASSWORD"]
 db_host = os.environ["DATABASE_HOST"]

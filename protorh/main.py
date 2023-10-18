@@ -1,10 +1,11 @@
+import uvicorn
 from fastapi import FastAPI
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from typing import Optional, List
-import serializers
 from database import SessionLocal
 from models import User, RequestRH, Event, Department
+import serializers
 
 
 app = FastAPI()
@@ -16,3 +17,7 @@ db = SessionLocal()
 def GetAllEvent():
     events = db.query(Event).all()
     return events
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=4242, reload=True)

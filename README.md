@@ -1,7 +1,7 @@
 # Groupe de PHAN et ZHU
 
 ## File organization
-- `main.py`: main routing file
+- `main.py`: main endpoints file
 - `models.py`: SQLAlchemy Table models
 - `serializers.py`: Pydantic data validation declarations
 - `database.py`: Create and connect to database
