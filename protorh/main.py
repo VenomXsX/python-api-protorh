@@ -7,7 +7,7 @@ from database import SessionLocal
 from models import User, RequestRH, Event, Department
 import serializers
 import sys
-
+from endpoint import event_queries
 
 if len(sys.argv) > 1:
     port = int(sys.argv[1])
@@ -18,7 +18,13 @@ app = FastAPI()
 
 db = SessionLocal()
 
-# Test route to get all events 
+app.include_router(event_queries.router)
+
+# @app.route('/events')
+# def root():
+#     return 
+
+# Test route to get all events
 @app.get("/events", response_model=List[serializers.Event])
 def GetAllEvent():
     events = db.query(Event).all()
