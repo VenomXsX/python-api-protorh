@@ -18,7 +18,13 @@ Our Amazing API helps you do awesome stuff. 🚀
 
 ## Events
 
-You can **read Events**.
+You can:
+
+* Get **all events**
+* Get **event by id**
+* **Create** an event
+* **Update** an event
+* **Delete** an event
 
 ## Users
 
