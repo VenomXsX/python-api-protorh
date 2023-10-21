@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from pydantic import BaseModel, Json, NaiveDatetime
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import date
 from sqlalchemy import CursorResult, RowMapping
 
@@ -18,10 +18,41 @@ class User(BaseModel):
     address: str
     postal_code: str
     age: int
-    meta: Json
+    meta: str
     registration_date: NaiveDatetime
     token: str
     role: str
+
+
+
+class CreateUser(BaseModel):
+    email: str
+    password: str
+    firstname: str
+    lastname: str
+    birthday_date: NaiveDatetime
+    address: str
+    postal_code: str
+    age: int
+    meta: str
+    registration_date: NaiveDatetime
+    token: str
+    role: str
+
+
+class UpdateUser(BaseModel):
+    email: Optional[str]
+    password: Optional[str]
+    firstname: Optional[str]
+    lastname: Optional[str]
+    birthday_date: Optional[NaiveDatetime]
+    address: Optional[str]
+    postal_code: Optional[str]
+    age: Optional[int]
+    meta: Optional[str]
+    registration_date: Optional[NaiveDatetime]
+    token: Optional[str]
+    role: Optional[str]
 
 
 class RequestRH(BaseModel):

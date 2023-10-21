@@ -60,6 +60,9 @@ app.include_router(events.router, prefix="/api")
 def root():
     return "API is working"
 
+@app.get("/")
+def root():
+    return "REST API is working yey"
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)
