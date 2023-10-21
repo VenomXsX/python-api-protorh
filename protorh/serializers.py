@@ -1,6 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
 from pydantic import BaseModel, Json, NaiveDatetime
-from typing import List, Union, Optional
+from typing import List, Optional, Union
+from datetime import date
+from sqlalchemy import CursorResult, RowMapping
 
 
 Base = declarative_base()
@@ -67,10 +69,26 @@ class RequestRH(BaseModel):
 class Event(BaseModel):
     id: int
     name: str
-    date: NaiveDatetime
+    date: date
     description: str
     user_id: int
     department_id: int
+
+
+class EventRequired(BaseModel):
+    name: str
+    date: str
+    description: str
+    user_id: int
+    department_id: int
+
+
+class EventOptional(BaseModel):
+    name: Optional[str] = None
+    date: Optional[str] = None
+    description: Optional[str] = None
+    user_id: Optional[int] = None
+    department_id: Optional[int] = None
 
 
 class Department(BaseModel):
