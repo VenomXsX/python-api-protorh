@@ -20,7 +20,11 @@ def GetEventAll():
     q = text("SELECT * FROM event")
     res: RowMapping = db.execute(q).mappings().all()
     db.commit()
-    return helper.response(200, "Events found", data=res)
+    return helper.response(
+        200,
+        "Events found" if len(res) != 0 else "No events found",
+        data=res
+    )
 
 
 @router.get("/{id}")
@@ -37,7 +41,12 @@ def GetEvent(id):
 
 @router.post("/create")
 def Create(item: serializers.EventRequired):
-    q = text("INSERT INTO event (name, date, description, user_id, department_id) VALUES (:name, :date, :description, :user_id, :department_id)")
+    q = text(
+        "INSERT INTO event"
+        "(name, date, description, user_id, department_id)"
+        "VALUES"
+        "(:name, :date, :description, :user_id, :department_id)"
+    )
     values = {
         "name": item.name,
         "date": item.date,
@@ -48,7 +57,12 @@ def Create(item: serializers.EventRequired):
     res: CursorResult = db.execute(q, values)
     db.commit()
     if res.rowcount == 0:
-        return helper.response(400, "Oops an error occured, please retry", data=values, res=res)
+        return helper.response(
+            400,
+            "Oops an error occured, please retry",
+            data=values,
+            res=res
+        )
     return helper.response(200, "Successfully addded", data=values, res=res)
 
 
@@ -58,18 +72,36 @@ def Delete(id):
     res: CursorResult = db.execute(q, {"id": id})
     db.commit()
     if res.rowcount == 0:
-        return helper.response(400, "This event does not exist, id: " + id, res=res)
+        return helper.response(
+            400,
+            "This event does not exist, id: " + id,
+            res=res
+        )
     return helper.response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
 @router.put("/{id}")
 def Update(id, item: serializers.EventOptional):
     set_string, values = helper.make_fields(
-        item, fields_name=["name", "description", "date", "user_id", "department_id"], id=id)
+        item,
+        ["name", "description", "date", "user_id", "department_id"],
+        id=id
+    )
 
     q = text(helper.trim(f"UPDATE event SET {set_string} WHERE id = :id"))
     res: CursorResult = db.execute(q, values)
     db.commit()
     if res.rowcount == 0:
-        return helper.response(400, "Nothing updated, please double check the id", data=values, res=res)
-    return helper.response(200, "Successfully updated, id: " + id, data=values, res=res)
+        return helper.response(
+            400,
+            "Nothing updated, please double check the id",
+            data=values,
+            res=res
+        )
+
+    return helper.response(
+        200,
+        "Successfully updated, id: " + id,
+        data=values,
+        res=res
+    )
