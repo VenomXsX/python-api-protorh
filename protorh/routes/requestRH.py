@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from sqlalchemy import text, CursorResult, RowMapping
 from utils import helper
 
+
 router = APIRouter(
     prefix='/requests',
     tags=['request']
@@ -40,19 +41,24 @@ def GetEvent(id):
 
 
 @router.post("/create")
-def Create(item: serializers.EventRequired):
+def Create(item: serializers.RequestRHRequired):
     q = text(
         "INSERT INTO request_rh"
-        "(name, date, description, user_id, department_id)"
+        "(user_id, content, registration_date,"
+        "visibility, close, last_action, content_history)"
         "VALUES"
-        "(:name, :date, :description, :user_id, :department_id)"
+        "(:user_id, :content, :registration_date,"
+        ":visibility, :close, :last_action,"
+        "(:content_history)::json[])"
     )
     values = {
-        "name": item.name,
-        "date": item.date,
-        "description": item.description,
         "user_id": item.user_id,
-        "department_id": item.department_id,
+        "content": item.content,
+        "registration_date": item.registration_date,
+        "visibility": item.visibility,
+        "close": item.close,
+        "last_action": item.last_action,
+        "content_history": helper.dict_to_sql_array(item.content_history)
     }
     res: CursorResult = db.execute(q, values)
     db.commit()
@@ -81,14 +87,25 @@ def Delete(id):
 
 
 @router.put("/{id}")
-def Update(id, item: serializers.EventOptional):
+def Update(id, item: serializers.RequestRHOptional):
     set_string, values = helper.make_fields(
         item,
-        ["name", "description", "date", "user_id", "department_id"],
+        ["user_id", "content", "registration_date", "visibility",
+            "close", "last_action"],
         id=id
     )
 
-    q = text(helper.trim(f"UPDATE request_rh SET {set_string} WHERE id = :id"))
+    # set current history if exist
+    content_history = ""
+    if item.content_history != None:
+        values["content_history"] = helper.dict_to_sql_array(
+            item.content_history)
+        content_history = ",content_history = (:content_history)::json[]"
+
+    q = text(helper.trim(
+        f"UPDATE request_rh SET {set_string} {content_history}"
+        "WHERE id = :id"
+    ))
     res: CursorResult = db.execute(q, values)
     db.commit()
     if res.rowcount == 0:
