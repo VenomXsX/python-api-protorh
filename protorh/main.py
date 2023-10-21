@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import sys
 
 # routes imports
-from routes import events
+from routes import events, requestRH
 
 # run on diffenrent port with args if not working
 if len(sys.argv) > 1:
@@ -53,16 +53,14 @@ app = FastAPI(
 
 # routes
 app.include_router(events.router, prefix="/api")
+app.include_router(requestRH.router, prefix="/api")
 
 
 # default route
 @app.get("/")
 def root():
-    return "API is working"
-
-@app.get("/")
-def root():
     return "REST API is working yey"
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)

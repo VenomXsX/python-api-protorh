@@ -24,7 +24,6 @@ class User(BaseModel):
     role: str
 
 
-
 class CreateUser(BaseModel):
     email: str
     password: str
@@ -59,11 +58,31 @@ class RequestRH(BaseModel):
     id: int
     user_id: int
     content: str
-    registration_date: NaiveDatetime
+    registration_date: date
     visibility: bool
     close: bool
-    last_action: NaiveDatetime
-    content_history: List[Json]
+    last_action: date
+    content_history: List[dict]
+
+
+class RequestRHRequired(BaseModel):
+    user_id: int
+    content: str
+    registration_date: date
+    visibility: bool
+    close: bool
+    last_action: date
+    content_history: List[dict]
+
+
+class RequestRHOptional(BaseModel):
+    user_id: Optional[int] = None
+    content: Optional[str] = None
+    registration_date: Optional[date] = None
+    visibility: Optional[bool] = None
+    close: Optional[bool] = None
+    last_action: Optional[date] = None
+    content_history: Optional[List[dict]] = None
 
 
 class Event(BaseModel):
