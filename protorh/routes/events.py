@@ -1,8 +1,7 @@
 # from __main__ import app
 from database import SessionLocal
-from typing import Optional, List, Union
 import serializers
-from models import User, RequestRH, Event, Department
+from models import Event
 from fastapi import APIRouter
 from sqlalchemy import text, CursorResult, RowMapping
 from utils import helper
@@ -16,15 +15,15 @@ router = APIRouter(
 db = SessionLocal()
 
 
-@router.get("/", response_model=List[serializers.Event])
+@router.get("/")
 def GetEventAll():
     q = text("SELECT * FROM event")
     res: RowMapping = db.execute(q).mappings().all()
     db.commit()
-    return res
+    return helper.response(200, "Events found", data=res)
 
 
-@router.get("/{id}", response_model=Union[serializers.Event, str])
+@router.get("/{id}")
 def GetEvent(id):
     q = text("SELECT * FROM event WHERE id = :id LIMIT 1")
     # useing mappings to turn it as Array
@@ -32,25 +31,25 @@ def GetEvent(id):
     res: RowMapping = db.execute(q, {"id": id}).mappings().all()
     db.commit()
     if len(res) == 0:
-        return "No event found. id: " + id
-    return res[0]
+        return helper.response(404, "No event found. id: " + id)
+    return helper.response(200, "Event found. id: " + id, data=res[0])
 
 
 @router.post("/create")
-def Create(event: serializers.EventIn):
+def Create(item: serializers.EventRequired):
     q = text("INSERT INTO event (name, date, description, user_id, department_id) VALUES (:name, :date, :description, :user_id, :department_id)")
     values = {
-        "name": event.name,
-        "date": event.date,
-        "description": event.description,
-        "user_id": event.user_id,
-        "department_id": event.department_id,
+        "name": item.name,
+        "date": item.date,
+        "description": item.description,
+        "user_id": item.user_id,
+        "department_id": item.department_id,
     }
     res: CursorResult = db.execute(q, values)
     db.commit()
     if res.rowcount == 0:
-        return "Oops an error occured, please retry"
-    return "Sucessfully added"
+        return helper.response(400, "Oops an error occured, please retry", data=values, res=res)
+    return helper.response(200, "Successfully addded", data=values, res=res)
 
 
 @router.delete("/{id}")
@@ -59,33 +58,18 @@ def Delete(id):
     res: CursorResult = db.execute(q, {"id": id})
     db.commit()
     if res.rowcount == 0:
-        return "This event does not exist, id: " + id
-    return "Sucessfully deleted, id: " + id
+        return helper.response(400, "This event does not exist, id: " + id, res=res)
+    return helper.response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
 @router.put("/{id}")
-def Update(id, item: serializers.EventIn):
-    set_string = ""
-    if item.name:
-        helper.concat_set(set_string, "name")
-    if item.description:
-        helper.concat_set(set_string, "description")
-    if item.date:
-        helper.concat_set(set_string, "date")
-    if item.user_id:
-        helper.concat_set(set_string, "user_id")
-    if item.department_id:
-        helper.concat_set(set_string, "department_id")
+def Update(id, item: serializers.EventOptional):
+    set_string, values = helper.make_fields(
+        item, fields_name=["name", "description", "date", "user_id", "department_id"], id=id)
 
-    q = text("UPDATE event SET " + set_string + " WHERE id = :id".strip())
-    values = {
-        "id": id,
-        "name": item.name,
-        "description": item.description,
-        "date": item.date,
-        "user_id": item.user_id,
-        "department_id": item.department_id
-    }
-    res = db.execute(q, values)
+    q = text(helper.trim(f"UPDATE event SET {set_string} WHERE id = :id"))
+    res: CursorResult = db.execute(q, values)
     db.commit()
-    return set_string
+    if res.rowcount == 0:
+        return helper.response(400, "Nothing updated, please double check the id", data=values, res=res)
+    return helper.response(200, "Successfully updated, id: " + id, data=values, res=res)
