@@ -1,7 +1,5 @@
-# from __main__ import app
 from database import SessionLocal
 import serializers
-from models import Event
 from fastapi import APIRouter
 from sqlalchemy import text, CursorResult, RowMapping
 from utils import helper

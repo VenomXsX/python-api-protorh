@@ -112,3 +112,12 @@ class EventOptional(BaseModel):
 class Department(BaseModel):
     id: int
     name: str
+
+
+class TestOptional(BaseModel):
+    name: Optional[str] = None
+    date: Optional[_date] = None
+    number: Optional[int] = None
+    rjson: Optional[dict] = None
+    rarray: Optional[List[dict]] = None
+    opened: Optional[bool] = None
