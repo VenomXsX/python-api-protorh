@@ -1,6 +1,11 @@
 # Groupe de PHAN et ZHU
 
+## Important
+
+use `/api` route at start
+
 ## File organization
+
 - `main.py`: main endpoints file
 - `models.py`: SQLAlchemy Table models
 - `serializers.py`: Pydantic data validation declarations

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if ! command -v python3 >/dev/null 2>&1 ; then
     printf "Python3 is not installed.\n"
     exit 1
