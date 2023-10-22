@@ -85,7 +85,7 @@ def Delete(id):
     return helper.response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
-@router.put("/{id}")
+@router.patch("/{id}")
 def Update(id, items: serializers.RequestRHOptional):
     q, values = helper.make_sql(
         "UPDATE",
@@ -112,6 +112,38 @@ def Update(id, items: serializers.RequestRHOptional):
             data=values,
             res=res
         )
+
+    return helper.response(
+        200,
+        "Successfully updated, id: " + id,
+        data=values,
+        res=res
+    )
+
+
+@router.put("/{id}")
+def UpdateOrCreate(id, items: serializers.RequestRHRequired):
+    q, values = helper.make_sql(
+        "UPDATE",
+        table="request_rh",
+        items=items,
+        id=id,
+        fields=[
+            "user_id",
+            "content",
+            "registration_date",
+            "visibility",
+            "close",
+            "last_action",
+            "content_history"
+        ],
+        rarray=["content_history"]
+    )
+    res: CursorResult = db.execute(text(q), values)
+    db.commit()
+
+    if res.rowcount == 0:
+        return Create(items)
 
     return helper.response(
         200,

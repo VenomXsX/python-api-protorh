@@ -84,7 +84,7 @@ def Delete(id):
     return helper.response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
-@router.put("/{id}")
+@router.patch("/{id}")
 def Update(id, items: serializers.TestOptional):
     q, values = helper.make_sql(
         "UPDATE",
@@ -104,6 +104,31 @@ def Update(id, items: serializers.TestOptional):
             data=values,
             res=res
         )
+
+    return helper.response(
+        200,
+        "Successfully updated, id: " + id,
+        data=values,
+        res=res
+    )
+
+
+@router.put("/{id}")
+def UpdateOrCreate(id, items: serializers.TestOptional):  # required
+    q, values = helper.make_sql(
+        "UPDATE",
+        table="test",
+        items=items,
+        id=id,
+        fields=["name", "number", "date", "rjson", "rarray", "opened"],
+        rjson=["rjson"],
+        rarray=["rarray"]
+    )
+    res: CursorResult = db.execute(text(q), values)
+    db.commit()
+
+    if res.rowcount == 0:
+        return Create(items)
 
     return helper.response(
         200,
@@ -153,7 +178,9 @@ def test(items: serializers.TestOptional):
         helper.make_sql("CREATE", table="table", items=items, fields=[
             "name", "number", "date", "json"], rjson=["json"]),
         helper.make_sql("CREATE", table="table", items=items, fields=[
-            "name", "number", "date", "json", "json_array"],  rjson=["json"], rarray=["json_array"])
+            "name", "number", "date", "json", "json_array"],
+            rjson=["json"],
+            rarray=["json_array"])
     )
 
     # delete
@@ -163,13 +190,29 @@ def test(items: serializers.TestOptional):
 
     # update
     printer(
-        helper.make_sql("UPDATE", table="table", id=5, items=items,
-                        fields=["name", "desc", "date"]),
-        helper.make_sql("UPDATE", table="table", id=5, items=items, fields=[
-            "name", "desc", "date", "meta"], rjson=["meta"]),
-        helper.make_sql("UPDATE", table="table", id=5, items=items,
-                        fields=[
-                            "name", "desc", "date", "meta", "history"],  rjson=["meta"], rarray=["history"])
+        helper.make_sql(
+            "UPDATE",
+            table="table",
+            id=5,
+            items=items,
+            fields=["name", "desc", "date"]
+        ),
+        helper.make_sql(
+            "UPDATE",
+            table="table",
+            id=5,
+            items=items,
+            fields=["name", "desc", "date", "meta"],
+            rjson=["meta"]
+        ),
+        helper.make_sql(
+            "UPDATE",
+            table="table",
+            id=5,
+            items=items,
+            fields=["name", "desc", "date", "meta", "history"],
+            rjson=["meta"],
+            rarray=["history"])
     )
 
     # q = text()

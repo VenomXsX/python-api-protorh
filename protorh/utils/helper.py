@@ -25,10 +25,10 @@ def missing(name: str):
 
 
 def sql_select(table, *, fields=None, id=None):
-    select = ", ".join(fields) if fields != None else "*"
+    select = ", ".join(fields) if fields is not None else "*"
     where = ""
     prepare = {}
-    if id != None:
+    if id is not None:
         where = " WHERE id = :id LIMIT 1"
         prepare["id"] = id
     return trim(f"SELECT {select} FROM {table} {where}"), prepare
@@ -36,9 +36,9 @@ def sql_select(table, *, fields=None, id=None):
 
 def sql_create(table, items, fields, *, rjson=None, rarray=None):
     # throw Error: required fields
-    if fields == None:
+    if fields is None:
         raise Exception(missing("fields"))
-    if items == None:
+    if items is None:
         raise Exception(missing("items"))
 
     select = []
@@ -47,11 +47,12 @@ def sql_create(table, items, fields, *, rjson=None, rarray=None):
     items_dumps = items.model_dump()
 
     for val in fields:
-        if val in items_dumps and items_dumps[val] != None:
-            # check if there's a type dict or list and if rjson and/or rarray are passed
-            if type(items_dumps[val]) is dict and (rjson == None):
+        if val in items_dumps and items_dumps[val] is not None:
+            # check if there's a type dict or list
+            # and if rjson and/or rarray are passed
+            if type(items_dumps[val]) is dict and (rjson is None):
                 raise Exception(missing("rjson"))
-            if type(items_dumps[val]) is list and (rarray == None):
+            if type(items_dumps[val]) is list and (rarray is None):
                 raise Exception(missing("rarray"))
 
             # for Postgres weird json and json[]
@@ -74,7 +75,7 @@ def sql_create(table, items, fields, *, rjson=None, rarray=None):
 
 
 def sql_delete(table, id):
-    if id == None:
+    if id is None:
         raise Exception(missing("id"))
     prepare = {}
     prepare["id"] = id
@@ -82,11 +83,11 @@ def sql_delete(table, id):
 
 
 def sql_update(table, id, items, fields, *, rjson=None, rarray=None):
-    if id == None:
+    if id is None:
         raise Exception(missing("id"))
-    if fields == None:
+    if fields is None:
         raise Exception(missing("fields"))
-    if items == None:
+    if items is None:
         raise Exception(missing("items"))
 
     values = []
@@ -96,11 +97,12 @@ def sql_update(table, id, items, fields, *, rjson=None, rarray=None):
     prepare["id"] = id
 
     for val in fields:
-        if val in items_dumps and items_dumps[val] != None:
-            # check if there's a type dict or list and if rjson and/or rarray are passed
-            if type(items_dumps[val]) is dict and (rjson == None):
+        if val in items_dumps and items_dumps[val] is not None:
+            # check if there's a type dict or list
+            # and if rjson and/or rarray are passed
+            if type(items_dumps[val]) is dict and (rjson is None):
                 raise Exception(missing("rjson"))
-            if type(items_dumps[val]) is list and (rarray == None):
+            if type(items_dumps[val]) is list and (rarray is None):
                 raise Exception(missing("rarray"))
 
             # for Postgres weird json and json[]
@@ -119,7 +121,16 @@ def sql_update(table, id, items, fields, *, rjson=None, rarray=None):
     return f"UPDATE {table} SET {values} WHERE id = :id", prepare
 
 
-def make_sql(q: SQL_METHOD, *, table: TABLES, id: Union[str, int] = None,  items=None, fields: List[str] = None, rjson: List[str] = None, rarray: List[str] = None):
+def make_sql(
+        q: SQL_METHOD,
+        *,
+        table: TABLES,
+        id: Union[str, int] = None,
+        items=None,
+        fields: List[str] = None,
+        rjson: List[str] = None,
+        rarray: List[str] = None
+):
     """
     ## definition
 
@@ -139,5 +150,11 @@ def make_sql(q: SQL_METHOD, *, table: TABLES, id: Union[str, int] = None,  items
     return res
 
 
-def response(status: int, message: str, *, data=None, res: CursorResult = None):
+def response(
+        status: int,
+        message: str,
+        *,
+        data=None,
+        res: CursorResult = None
+):
     return {"res": res, "status": status, "message": message, "data": data}
