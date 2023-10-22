@@ -5,8 +5,8 @@ from sqlalchemy import text, CursorResult, RowMapping
 from utils import helper
 
 router = APIRouter(
-    prefix='/events',
-    tags=['event']
+    prefix="/events",
+    tags=["event"]
 )
 
 
@@ -15,8 +15,8 @@ db = SessionLocal()
 
 @router.get("/")
 def GetEventAll():
-    q = text("SELECT * FROM event")
-    res: RowMapping = db.execute(q).mappings().all()
+    q, _ = helper.make_sql("SELECT", table="event")
+    res: RowMapping = db.execute(text(q)).mappings().all()
     db.commit()
     return helper.response(
         200,
@@ -27,10 +27,10 @@ def GetEventAll():
 
 @router.get("/{id}")
 def GetEvent(id):
-    q = text("SELECT * FROM event WHERE id = :id LIMIT 1")
-    # useing mappings to turn it as Array
+    q, values = helper.make_sql("SELECT", table="event", id=id)
+    # using mappings to turn it as Array
     # because it return CursorResult by default
-    res: RowMapping = db.execute(q, {"id": id}).mappings().all()
+    res: RowMapping = db.execute(text(q), values).mappings().all()
     db.commit()
     if len(res) == 0:
         return helper.response(404, "No event found. id: " + id)
@@ -38,21 +38,20 @@ def GetEvent(id):
 
 
 @router.post("/create")
-def Create(item: serializers.EventRequired):
-    q = text(
-        "INSERT INTO event"
-        "(name, date, description, user_id, department_id)"
-        "VALUES"
-        "(:name, :date, :description, :user_id, :department_id)"
+def Create(items: serializers.EventRequired):
+    q, values = helper.make_sql(
+        "CREATE",
+        table="event",
+        items=items,
+        fields=[
+            "name",
+            "date",
+            "description",
+            "user_id",
+            "department_id"
+        ]
     )
-    values = {
-        "name": item.name,
-        "date": item.date,
-        "description": item.description,
-        "user_id": item.user_id,
-        "department_id": item.department_id,
-    }
-    res: CursorResult = db.execute(q, values)
+    res: CursorResult = db.execute(text(q), values)
     db.commit()
     if res.rowcount == 0:
         return helper.response(
@@ -66,8 +65,12 @@ def Create(item: serializers.EventRequired):
 
 @router.delete("/{id}")
 def Delete(id):
-    q = text("DELETE FROM event WHERE id = :id")
-    res: CursorResult = db.execute(q, {"id": id})
+    q, values = helper.make_sql(
+        "DELETE",
+        table="event",
+        id=id
+    )
+    res: CursorResult = db.execute(text(q), values)
     db.commit()
     if res.rowcount == 0:
         return helper.response(
@@ -79,15 +82,21 @@ def Delete(id):
 
 
 @router.put("/{id}")
-def Update(id, item: serializers.EventOptional):
-    set_string, values = helper.make_fields(
-        item,
-        ["name", "description", "date", "user_id", "department_id"],
-        id=id
+def Update(id, items: serializers.EventOptional):
+    q, values = helper.make_sql(
+        "UPDATE",
+        table="event",
+        id=id,
+        items=items,
+        fields=[
+            "name",
+            "date",
+            "description",
+            "user_id",
+            "department_id"
+        ]
     )
-
-    q = text(helper.trim(f"UPDATE event SET {set_string} WHERE id = :id"))
-    res: CursorResult = db.execute(q, values)
+    res: CursorResult = db.execute(text(q), values)
     db.commit()
     if res.rowcount == 0:
         return helper.response(
