@@ -1,7 +1,7 @@
 from database import SessionLocal
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import text, CursorResult, RowMapping
-from utils.helper import make_sql, response
+from utils.helper import make_sql, response, printer
 import serializers
 from lib.auth import verify_password, get_password_hash
 from pydantic import BaseModel
@@ -14,12 +14,6 @@ router = APIRouter(
 
 
 db = SessionLocal()
-
-
-def printer(*items):
-    for item in items:
-        print(item)
-    print("")
 
 
 @router.get("/")
@@ -51,19 +45,20 @@ def GetById(id):
     return response(200, "test found. id: " + id, data=res[0])
 
 
-
 # testing
 
 class Testing(BaseModel):
     password: str
     hashed: str
 
+
 @router.post("/test")
 def testing(items: Testing):
     return {
         "hashed": get_password_hash(items.password),
-        "is_valid": verify_password(items.password, items.hashed) 
+        "is_valid": verify_password(items.password, items.hashed)
     }
+
 
 @router.post("/create")
 def Create(items: serializers.TestOptional):

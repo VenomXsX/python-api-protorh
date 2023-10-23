@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import sys
 
 # routes imports
-from routes import events, requestRH, test, users
+from routes import events, requestRH, test, users, connect
 
 # run on diffenrent port with args if not working
 if len(sys.argv) > 1:
@@ -56,6 +56,7 @@ app.include_router(events.router, prefix="/api")
 app.include_router(requestRH.router, prefix="/api")
 app.include_router(test.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
+app.include_router(connect.router, prefix="/api")
 
 
 # default route

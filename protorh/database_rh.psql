@@ -28,7 +28,7 @@ create index if not exists ix_user_id on public."users" using btree (id) tablesp
 create table
   public.request_rh (
     id bigserial,
-    user_id integer null,
+    user_id bigserial null,
     content character varying null,
     registration_date date not null default now(),
     visibility boolean null,

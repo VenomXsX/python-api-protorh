@@ -1,10 +1,22 @@
 from typing import List, Union, Literal
 from sqlalchemy import CursorResult
+from datetime import date
 import json
 
 
 SQL_METHOD = Literal["SELECT", "CREATE", "UPDATE", "DELETE"]
 TABLES = Literal["event", "users", "request_rh", "department"]
+
+
+def printer(*items):
+    for item in items:
+        print(item)
+    print("")
+
+
+def calc_age(birth: date):
+    today = date.today()
+    return today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
 
 
 def json_dump_array(obj: dict):
@@ -24,13 +36,21 @@ def missing(name: str):
     return f"Missing '{name}' in UPDATE method"
 
 
-def sql_select(table, *, fields=None, id=None):
+def sql_select(table, *, fields=None, id=None, email=None):
+    if id is not None and email is not None:
+        raise Exception(
+            "For SELECT method you can only pass one 'id' or 'email'")
+
     select = ", ".join(fields) if fields is not None else "*"
     where = ""
     prepare = {}
     if id is not None:
         where = " WHERE id = :id LIMIT 1"
         prepare["id"] = id
+    if email is not None:
+        where = " WHERE email = :email LIMIT 1"
+        prepare["email"] = email
+
     return trim(f"SELECT {select} FROM {table} {where}"), prepare
 
 
@@ -126,6 +146,7 @@ def make_sql(
         *,
         table: TABLES,
         id: Union[str, int] = None,
+        email: str = None,
         items=None,
         fields: List[str] = None,
         rjson: List[str] = None,
@@ -139,7 +160,7 @@ def make_sql(
     * `rarray` is for `json[]`
     """
     if q == "SELECT":
-        res = sql_select(table, fields=fields, id=id)
+        res = sql_select(table, fields=fields, id=id, email=email)
     if q == "CREATE":
         res = sql_create(table, items, fields, rjson=rjson, rarray=rarray)
     if q == "DELETE":

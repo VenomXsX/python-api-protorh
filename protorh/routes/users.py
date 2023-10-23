@@ -1,36 +1,32 @@
-from database import SessionLocal
 from typing import Optional, List, Union
 import serializers
 from models import User, RequestRH, Event, Department
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import text, CursorResult, RowMapping
 from models import User
 from database import engine
 import json
-from utils import helper
+from utils.helper import make_sql, response, printer, calc_age
+from lib.auth import get_password_hash, verify_password, hash_djb2, get_user
+from datetime import date
+from env import SALT
 
 router = APIRouter(
-    prefix='/users',
+    prefix='/user',
     tags=['user']
 )
 
-db = SessionLocal()
 
 # get all users
-
-
-@router.get("/", response_model=Union[List[serializers.User], str])
+@router.get("/", response_model=List[serializers.User])
 async def get_all():
-    q = text("SELECT * FROM users")
+    q, _ = make_sql("SELECT", table="users")
     with engine.begin() as conn:
-        result: RowMapping = conn.execute(q).mappings().all()
-        if len(result) == 0:
-            return "There is no user in the table"
+        result: RowMapping = conn.execute(text(q)).mappings().all()
     return result
 
+
 # get user by id
-
-
 @router.get("/{id}", response_model=Union[serializers.User, str])
 async def get(id):
     q = text("SELECT * FROM users WHERE id = :id")
@@ -41,37 +37,67 @@ async def get(id):
             return f"User id {id} doesn't exist"
     return result[0]
 
+
 # add a new user
+@router.post("/create", summary="Create new user")
+async def create(items: serializers.CreateUser):
+    # check if user already exist
+    user = get_user(items.email)
+    if user is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this email already exist"
+        )
 
+    # check password match
+    if items.password != items.confirm_pass:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password does not match",
+        )
 
-@router.post("/add", response_model=Union[serializers.CreateUser, str])
-async def add(user: serializers.CreateUser):
-    q = text(
-        "INSERT INTO users (email, password, firstname, lastname, birthday_date, address, postal_code, age, meta, registration_date, token, role) VALUES (:email, :password, :firstname, :lastname, :birthday_date, :address, :postal_code, :age, :meta, :registration_date, :token, :role) RETURNING *")
-    values = {
-        "email": user.email,
-        "password": user.password,
-        "firstname": user.firstname,
-        "lastname": user.lastname,
-        "birthday_date": user.birthday_date,
-        "address": user.address,
-        "postal_code": user.postal_code,
-        "age": user.age,
-        "meta": json.dumps(user.meta),
-        "registration_date": user.registration_date,
-        "token": user.token,
-        "role": user.role
-    }
+    # overwrite needed fields 'cause optional
+    items.password = get_password_hash(items.password)
+    items.age = calc_age(items.birthday_date)
+    items.meta = {}
+    items.registration_date = date.today()
+    items.token = hash_djb2(
+        items.email + items.firstname + items.lastname + SALT
+    )
+    items.role = "user"
 
+    # create query
+    q, values = make_sql(
+        "CREATE",
+        table="users",
+        items=items,
+        fields=[
+            "email",
+            "password",
+            "firstname",
+            "lastname",
+            "birthday_date",
+            "address",
+            "postal_code",
+            "age",
+            "meta",
+            "registration_date",
+            "token",
+            "role"
+        ],
+        rjson=["meta"]
+    )
     with engine.begin() as conn:
-        result: CursorResult = conn.execute(q, values)
+        result: CursorResult = conn.execute(text(q), values)
         if result.rowcount == 0:
-            return "Something went wrong and 0 rows affected"
-    return user
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Something went wrong, please retry"
+            )
+    return values
+
 
 # delete user by id
-
-
 @router.delete("/delete/{id}", response_model=str)
 async def delete(id: int):
     q = text("DELETE FROM users WHERE id=:id")
@@ -84,34 +110,33 @@ async def delete(id: int):
             return "Something went wrong and 0 rows affected"
     return f"User id {id} removed from Users"
 
+
 # update a specific user column(s)
-
-
 @router.put("/update/{id}")
 async def update(id, items: serializers.UpdateUser):
-    q, values = helper.make_sql("UPDATE",
-                                table="users",
-                                id=id,
-                                items=items,
-                                fields=[
-                                    "email",
-                                    "password",
-                                    "firstname",
-                                    "lastname",
-                                    "birthday_date",
-                                    "address",
-                                    "postal_code",
-                                    "age",
-                                    "meta",
-                                    "registration_date",
-                                    "token",
-                                    "role"],
-                                rjson=["meta"])
+    q, values = make_sql("UPDATE",
+                         table="users",
+                         id=id,
+                         items=items,
+                         fields=[
+                             "email",
+                             "password",
+                             "firstname",
+                             "lastname",
+                             "birthday_date",
+                             "address",
+                             "postal_code",
+                             "age",
+                             "meta",
+                             "registration_date",
+                             "token",
+                             "role"],
+                         rjson=["meta"])
     with engine.begin() as conn:
         result: CursorResult = conn.execute(text(q), values)
     if result.rowcount == 0:
-        return helper.response(400, "Nothing updated, please double check the id", data=values, res=result)
-    return helper.response(200, "Successfully updated, id: " + id, data=values, res=result)
+        return response(400, "Nothing updated, please double check the id", data=values, res=result)
+    return response(200, "Successfully updated, id: " + id, data=values, res=result)
 
 
 # update password for specific user
@@ -137,7 +162,7 @@ async def update_password(id: int, content: serializers.UpdatePasswordUser):
 #             text(f"SELECT meta FROM users WHERE id = {id}")).mappings().all()
 #         meta = result[0].meta
 #         meta["path"] = data.path
-#         q, values = helper.make_sql("UPDATE", table="users", id=data.id, items="")
+#         q, values = make_sql("UPDATE", table="users", id=data.id, items="")
 #         result: CursorResult = conn.execute(q, values)
 #         if result.rowcount == 0:
 #             return "Something went wrong and 0 rows affected"

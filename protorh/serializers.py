@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from pydantic import BaseModel, Json, NaiveDatetime, validator, ValidationError
+from pydantic import BaseModel, validator, ValidationError
 from typing import List, Optional, Union, Any, Dict
 from datetime import date as _date
 from sqlalchemy import CursorResult, RowMapping
@@ -13,6 +13,20 @@ class MetaModel(BaseModel):
     profile_picture: str
 
 
+class FormData(BaseModel):
+    email: str
+    password: str
+
+
+class UserOut(BaseModel):
+    id: int
+    email: str
+
+
+class UserWithPass(UserOut):
+    password: str
+
+
 class User(BaseModel):
     id: int
     email: str
@@ -23,45 +37,46 @@ class User(BaseModel):
     address: str
     postal_code: str
     age: int
-    meta: Dict[str, Any]
-    registration_date: NaiveDatetime
+    meta: dict
+    registration_date: _date
     token: str
     role: str
 
-    @validator("meta")
-    def validate_meta(cls, value):
-        try:
-            # Try to parse the dictionary as a MetaModel
-            meta_model = MetaModel(**value)
-            return value
-        except ValidationError as e:
-            # If validation fails, raise an error
-            raise ValueError(f"Invalid meta: {e}")
+    # @validator("meta")
+    # def validate_meta(cls, value):
+    #     try:
+    #         # Try to parse the dictionary as a MetaModel
+    #         meta_model = MetaModel(**value)
+    #         return value
+    #     except ValidationError as e:
+    #         # If validation fails, raise an error
+    #         raise ValueError(f"Invalid meta: {e}")
 
 
 class CreateUser(BaseModel):
     email: str
     password: str
+    confirm_pass: str
     firstname: str
     lastname: str
     birthday_date: _date
     address: str
     postal_code: str
-    age: int
-    meta: Dict[str, Any]
-    registration_date: NaiveDatetime
-    token: str
-    role: str
+    age: Optional[int] = None
+    meta: Optional[dict] = None
+    registration_date: Optional[_date] = None
+    token: Optional[str] = None
+    role: Optional[str] = None
 
-    @validator("meta")
-    def validate_meta(cls, value):
-        try:
-            # Try to parse the dictionary as a MetaModel
-            meta_model = MetaModel(**value)
-            return value
-        except ValidationError as e:
-            # If validation fails, raise an error
-            raise ValueError(f"Invalid meta: {e}")
+    # @validator("meta")
+    # def validate_meta(cls, value):
+    #     try:
+    #         # Try to parse the dictionary as a MetaModel
+    #         meta_model = MetaModel(**value)
+    #         return value
+    #     except ValidationError as e:
+    #         # If validation fails, raise an error
+    #         raise ValueError(f"Invalid meta: {e}")
 
 
 class UpdateUser(BaseModel):
@@ -78,15 +93,15 @@ class UpdateUser(BaseModel):
     token: Optional[str] = None
     role: Optional[str] = None
 
-    @validator("meta")
-    def validate_meta(cls, value):
-        try:
-            # Try to parse the dictionary as a MetaModel
-            meta_model = MetaModel(**value)
-            return value
-        except ValidationError as e:
-            # If validation fails, raise an error
-            raise ValueError(f"Invalid meta: {e}")
+    # @validator("meta")
+    # def validate_meta(cls, value):
+    #     try:
+    #         # Try to parse the dictionary as a MetaModel
+    #         meta_model = MetaModel(**value)
+    #         return value
+    #     except ValidationError as e:
+    #         # If validation fails, raise an error
+    #         raise ValueError(f"Invalid meta: {e}")
 
 
 class UpdatePasswordUser(BaseModel):
