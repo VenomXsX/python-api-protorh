@@ -1,8 +1,10 @@
 from database import SessionLocal
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import text, CursorResult, RowMapping
-from utils import helper
+from utils.helper import make_sql, response
 import serializers
+from lib.auth import verify_password, get_password_hash
+from pydantic import BaseModel
 
 
 router = APIRouter(
@@ -22,7 +24,7 @@ def printer(*items):
 
 @router.get("/")
 def GetAll():
-    q, _ = helper.make_sql("SELECT", table="test")
+    q, _ = make_sql("SELECT", table="test")
     res: RowMapping = db.execute(text(q)).mappings().all()
     db.commit()
     # raise HTTPException(
@@ -30,7 +32,7 @@ def GetAll():
     #     detail="You're not authorized",
     #     headers={"WWW-Authenticate": "Bearer"}
     # )
-    return helper.response(
+    return response(
         200,
         "Test found" if len(res) != 0 else "No test found",
         data=res
@@ -39,19 +41,33 @@ def GetAll():
 
 @router.get("/{id}")
 def GetById(id):
-    q, values = helper.make_sql("SELECT", table="test", id=id)
+    q, values = make_sql("SELECT", table="test", id=id)
     # useing mappings to turn it as Array
     # because it return CursorResult by default
     res: RowMapping = db.execute(text(q), values).mappings().all()
     db.commit()
     if len(res) == 0:
-        return helper.response(404, "No test found. id: " + id)
-    return helper.response(200, "test found. id: " + id, data=res[0])
+        return response(404, "No test found. id: " + id)
+    return response(200, "test found. id: " + id, data=res[0])
 
+
+
+# testing
+
+class Testing(BaseModel):
+    password: str
+    hashed: str
+
+@router.post("/test")
+def testing(items: Testing):
+    return {
+        "hashed": get_password_hash(items.password),
+        "is_valid": verify_password(items.password, items.hashed) 
+    }
 
 @router.post("/create")
 def Create(items: serializers.TestOptional):
-    q, values = helper.make_sql(
+    q, values = make_sql(
         "CREATE",
         table="test",
         items=items,
@@ -62,18 +78,18 @@ def Create(items: serializers.TestOptional):
     res: CursorResult = db.execute(text(q), values)
     db.commit()
     if res.rowcount == 0:
-        return helper.response(
+        return response(
             400,
             "Oops an error occured, please retry",
             data=values,
             res=res
         )
-    return helper.response(200, "Successfully addded", data=values, res=res)
+    return response(200, "Successfully addded", data=values, res=res)
 
 
 @router.delete("/{id}")
 def Delete(id):
-    q, values = helper.make_sql(
+    q, values = make_sql(
         "DELETE",
         table="test",
         id=id
@@ -81,17 +97,17 @@ def Delete(id):
     res: CursorResult = db.execute(text(q), values)
     db.commit()
     if res.rowcount == 0:
-        return helper.response(
+        return response(
             400,
             "This test does not exist, id: " + id,
             res=res
         )
-    return helper.response(200, "Sucessfully deleted, id: " + id, res=res)
+    return response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
 @router.patch("/{id}")
 def Update(id, items: serializers.TestOptional):
-    q, values = helper.make_sql(
+    q, values = make_sql(
         "UPDATE",
         table="test",
         id=id,
@@ -103,14 +119,14 @@ def Update(id, items: serializers.TestOptional):
     res: CursorResult = db.execute(text(q), values)
     db.commit()
     if res.rowcount == 0:
-        return helper.response(
+        return response(
             400,
             "Nothing updated, please double check the 'id'",
             data=values,
             res=res
         )
 
-    return helper.response(
+    return response(
         200,
         "Successfully updated, id: " + id,
         data=values,
@@ -120,7 +136,7 @@ def Update(id, items: serializers.TestOptional):
 
 @router.put("/{id}")
 def UpdateOrCreate(id, items: serializers.TestOptional):  # required
-    q, values = helper.make_sql(
+    q, values = make_sql(
         "UPDATE",
         table="test",
         items=items,
@@ -135,7 +151,7 @@ def UpdateOrCreate(id, items: serializers.TestOptional):  # required
     if res.rowcount == 0:
         return Create(items)
 
-    return helper.response(
+    return response(
         200,
         "Successfully updated, id: " + id,
         data=values,
@@ -170,19 +186,19 @@ def test(items: serializers.TestOptional):
 
     # select
     printer(
-        helper.make_sql("SELECT", table="table"),
-        helper.make_sql("SELECT", table="table", id=5),
-        helper.make_sql("SELECT", table="table", id=123,
-                        fields=["name", "desc", "date"])
+        make_sql("SELECT", table="table"),
+        make_sql("SELECT", table="table", id=5),
+        make_sql("SELECT", table="table", id=123,
+                 fields=["name", "desc", "date"])
     )
 
     # create
     printer(
-        helper.make_sql("CREATE", table="table",
-                        items=items, fields=["name", "number", "date"]),
-        helper.make_sql("CREATE", table="table", items=items, fields=[
+        make_sql("CREATE", table="table",
+                 items=items, fields=["name", "number", "date"]),
+        make_sql("CREATE", table="table", items=items, fields=[
             "name", "number", "date", "json"], rjson=["json"]),
-        helper.make_sql("CREATE", table="table", items=items, fields=[
+        make_sql("CREATE", table="table", items=items, fields=[
             "name", "number", "date", "json", "json_array"],
             rjson=["json"],
             rarray=["json_array"])
@@ -190,19 +206,19 @@ def test(items: serializers.TestOptional):
 
     # delete
     printer(
-        helper.make_sql("DELETE", table="table", id=5)
+        make_sql("DELETE", table="table", id=5)
     )
 
     # update
     printer(
-        helper.make_sql(
+        make_sql(
             "UPDATE",
             table="table",
             id=5,
             items=items,
             fields=["name", "desc", "date"]
         ),
-        helper.make_sql(
+        make_sql(
             "UPDATE",
             table="table",
             id=5,
@@ -210,7 +226,7 @@ def test(items: serializers.TestOptional):
             fields=["name", "desc", "date", "meta"],
             rjson=["meta"]
         ),
-        helper.make_sql(
+        make_sql(
             "UPDATE",
             table="table",
             id=5,
@@ -222,7 +238,7 @@ def test(items: serializers.TestOptional):
 
     # q = text()
     # print(q)
-    return helper.response(
+    return response(
         200,
         "script executed",
     )

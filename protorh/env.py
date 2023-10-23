@@ -12,5 +12,3 @@ SALT = os.environ["SALT"]
 
 DB_URL = "postgresql://" + DB_USER + ":" + DB_PASSWORD + \
     "@" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
