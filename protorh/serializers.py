@@ -95,7 +95,7 @@ class UpdatePasswordUser(BaseModel):
 
 class UploadProfilePictureData(BaseModel):
     id: int
-    url: str
+    path: str
 
 
 class RequestRH(BaseModel):

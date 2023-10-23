@@ -88,13 +88,27 @@ async def delete(id: int):
 
 
 @router.put("/update/{id}")
-async def update(id, user: serializers.UpdateUser):
-    set_string, values = helper.make_fields(
-        user, fields_name=["email", "password", "firstname", "lastname", "birthday_date", "address", "postal_code", "age", "meta", "registration_date", "token", "role"], id=id)
-
-    q = text(helper.trim(f"UPDATE users SET {set_string} WHERE id = :id"))
+async def update(id, items: serializers.UpdateUser):
+    q, values = helper.make_sql("UPDATE",
+                                table="users",
+                                id=id,
+                                items=items,
+                                fields=[
+                                    "email",
+                                    "password",
+                                    "firstname",
+                                    "lastname",
+                                    "birthday_date",
+                                    "address",
+                                    "postal_code",
+                                    "age",
+                                    "meta",
+                                    "registration_date",
+                                    "token",
+                                    "role"],
+                                rjson=["meta"])
     with engine.begin() as conn:
-        result: CursorResult = conn.execute(q, values)
+        result: CursorResult = conn.execute(text(q), values)
     if result.rowcount == 0:
         return helper.response(400, "Nothing updated, please double check the id", data=values, res=result)
     return helper.response(200, "Successfully updated, id: " + id, data=values, res=result)
@@ -116,19 +130,15 @@ async def update_password(id: int, content: serializers.UpdatePasswordUser):
 
 
 # update profile picture for specific user
-@router.put("/update/profile-picture/")
-async def upload_profile_picture(data: serializers.UploadProfilePictureData):
-    with engine.begin() as conn:
-        result: RowMapping = conn.execute(
-            text(f"SELECT meta FROM users WHERE id = {data.id}")).mappings().all()
-        meta = result[0].meta
-        meta["profile_picture"] = data.url
-        q = text("UPDATE users SET meta = :meta WHERE id = :id")
-        values = {
-            "meta": json.dumps(meta),
-            "id": data.id
-        }
-        result: CursorResult = conn.execute(q, values)
-        if result.rowcount == 0:
-            return "Something went wrong and 0 rows affected"
-    return f"User id {data.id}'s profile picture has been updated"
+# @router.put("/upload/picture/{id}")
+# async def upload_profile_picture(data: serializers.UploadProfilePictureData):
+#     with engine.begin() as conn:
+#         result: RowMapping = conn.execute(
+#             text(f"SELECT meta FROM users WHERE id = {id}")).mappings().all()
+#         meta = result[0].meta
+#         meta["path"] = data.path
+#         q, values = helper.make_sql("UPDATE", table="users", id=data.id, items="")
+#         result: CursorResult = conn.execute(q, values)
+#         if result.rowcount == 0:
+#             return "Something went wrong and 0 rows affected"
+#     return f"User id {data.id}'s profile picture has been updated"
