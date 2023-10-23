@@ -2,7 +2,7 @@ from env import SALT, SECRET_KEY
 from jose import JWTError, jwt
 from passlib.hash import md5_crypt
 from database import engine
-from utils.helper import make_sql, row2dict
+from utils.helper import make_sql
 from sqlalchemy import text, CursorResult, RowMapping, Row
 from serializers import UserWithPass
 from typing import Union
