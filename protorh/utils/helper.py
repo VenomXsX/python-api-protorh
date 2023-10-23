@@ -1,5 +1,6 @@
 from typing import List, Union
 from sqlalchemy import CursorResult
+import json
 
 
 class NewString:
@@ -31,7 +32,7 @@ def make_fields(items, fields_name: List[str], *, id: Union[int, str] = None):
     for i in range(len(fields_name)):
         if items_dump[fields_name[i]]:
             concat_set(str, fields_name[i])
-            values[fields_name[i]] = items_dump[fields_name[i]]
+            values[fields_name[i]] = json.dumps(items_dump[fields_name[i]])
 
     remove_last_comma(str)
 

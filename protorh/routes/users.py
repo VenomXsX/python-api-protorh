@@ -51,7 +51,7 @@ async def add(user: serializers.CreateUser):
         "address": user.address,
         "postal_code": user.postal_code,
         "age": user.age,
-        "meta": user.meta,
+        "meta": json.dumps(user.meta),
         "registration_date": user.registration_date,
         "token": user.token,
         "role": user.role
