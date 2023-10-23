@@ -1,8 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
 from pydantic import BaseModel, Json, NaiveDatetime
-from typing import List, Optional, Union
-from datetime import date
+from typing import List, Optional, Union, Any
+from datetime import date as _date
 from sqlalchemy import CursorResult, RowMapping
+import json
 
 
 Base = declarative_base()
@@ -18,7 +19,7 @@ class User(BaseModel):
     address: str
     postal_code: str
     age: int
-    meta: str
+    meta: dict
     registration_date: NaiveDatetime
     token: str
     role: str
@@ -34,26 +35,34 @@ class CreateUser(BaseModel):
     address: str
     postal_code: str
     age: int
-    meta: str
+    meta: dict
     registration_date: NaiveDatetime
     token: str
     role: str
 
 
 class UpdateUser(BaseModel):
-    email: Optional[str]
-    password: Optional[str]
-    firstname: Optional[str]
-    lastname: Optional[str]
-    birthday_date: Optional[NaiveDatetime]
-    address: Optional[str]
-    postal_code: Optional[str]
-    age: Optional[int]
-    meta: Optional[str]
-    registration_date: Optional[NaiveDatetime]
-    token: Optional[str]
-    role: Optional[str]
+    email: Optional[str] = None
+    password: Optional[str] = None
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    birthday_date: Optional[NaiveDatetime] = None
+    address: Optional[str] = None
+    postal_code: Optional[str] = None
+    age: Optional[int] = None
+    meta: Optional[dict] = None
+    registration_date: Optional[NaiveDatetime] = None
+    token: Optional[str] = None
+    role: Optional[str] = None
 
+
+class UpdatePasswordUser(BaseModel):
+    password: str
+
+
+class UploadProfilePictureData(BaseModel):
+    id: int
+    url: str
 
 class RequestRH(BaseModel):
     id: int
@@ -69,7 +78,7 @@ class RequestRH(BaseModel):
 class Event(BaseModel):
     id: int
     name: str
-    date: date
+    date: _date
     description: str
     user_id: int
     department_id: int

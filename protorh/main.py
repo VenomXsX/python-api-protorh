@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import sys
 
 # routes imports
-from routes import events
+from routes import events, users
 
 # run on diffenrent port with args if not working
 if len(sys.argv) > 1:
@@ -53,6 +53,7 @@ app = FastAPI(
 
 # routes
 app.include_router(events.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
 
 # default route
