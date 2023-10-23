@@ -99,9 +99,8 @@ async def update(id, user: serializers.UpdateUser):
         return helper.response(400, "Nothing updated, please double check the id", data=values, res=result)
     return helper.response(200, "Successfully updated, id: " + id, data=values, res=result)
 
+
 # update password for specific user
-
-
 @router.put("/update/password/{id}")
 async def update_password(id: int, content: serializers.UpdatePasswordUser):
     q = text("UPDATE users SET password = :password WHERE id = :id")
