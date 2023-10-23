@@ -4,9 +4,10 @@ from fastapi import APIRouter
 from sqlalchemy import text, CursorResult, RowMapping
 from utils import helper
 
+
 router = APIRouter(
-    prefix="/events",
-    tags=["event"]
+    prefix="/requests",
+    tags=["request"]
 )
 
 
@@ -15,41 +16,44 @@ db = SessionLocal()
 
 @router.get("/")
 def GetEventAll():
-    q, _ = helper.make_sql("SELECT", table="event")
+    q, _ = helper.make_sql("SELECT", table="request_rh")
     res: RowMapping = db.execute(text(q)).mappings().all()
     db.commit()
     return helper.response(
         200,
-        "Events found" if len(res) != 0 else "No events found",
+        "RequestRHs found" if len(res) != 0 else "No requestRHs found",
         data=res
     )
 
 
 @router.get("/{id}")
 def GetEvent(id):
-    q, values = helper.make_sql("SELECT", table="event", id=id)
-    # using mappings to turn it as Array
+    q, values = helper.make_sql("SELECT", table="request_rh", id=id)
+    # useing mappings to turn it as Array
     # because it return CursorResult by default
     res: RowMapping = db.execute(text(q), values).mappings().all()
     db.commit()
     if len(res) == 0:
-        return helper.response(404, "No event found. id: " + id)
-    return helper.response(200, "Event found. id: " + id, data=res[0])
+        return helper.response(404, "No requestRH found. id: " + id)
+    return helper.response(200, "RequestRH found. id: " + id, data=res[0])
 
 
 @router.post("/create")
-def Create(items: serializers.EventRequired):
+def Create(items: serializers.RequestRHRequired):
     q, values = helper.make_sql(
         "CREATE",
-        table="event",
+        table="request_rh",
         items=items,
         fields=[
-            "name",
-            "date",
-            "description",
             "user_id",
-            "department_id"
-        ]
+            "content",
+            "registration_date",
+            "visibility",
+            "close",
+            "last_action",
+            "content_history"
+        ],
+        rarray=["content_history"]
     )
     res: CursorResult = db.execute(text(q), values)
     db.commit()
@@ -67,7 +71,7 @@ def Create(items: serializers.EventRequired):
 def Delete(id):
     q, values = helper.make_sql(
         "DELETE",
-        table="event",
+        table="request_rh",
         id=id
     )
     res: CursorResult = db.execute(text(q), values)
@@ -75,26 +79,29 @@ def Delete(id):
     if res.rowcount == 0:
         return helper.response(
             400,
-            "This event does not exist, id: " + id,
+            "This requestRH does not exist, id: " + id,
             res=res
         )
     return helper.response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
 @router.patch("/{id}")
-def Update(id, items: serializers.EventOptional):
+def Update(id, items: serializers.RequestRHOptional):
     q, values = helper.make_sql(
         "UPDATE",
-        table="event",
+        table="request_rh",
         id=id,
         items=items,
         fields=[
-            "name",
-            "date",
-            "description",
             "user_id",
-            "department_id"
-        ]
+            "content",
+            "registration_date",
+            "visibility",
+            "close",
+            "last_action",
+            "content_history"
+        ],
+        rarray=["content_history"]
     )
     res: CursorResult = db.execute(text(q), values)
     db.commit()
@@ -115,19 +122,22 @@ def Update(id, items: serializers.EventOptional):
 
 
 @router.put("/{id}")
-def UpdateOrCreate(id, items: serializers.EventRequired):
+def UpdateOrCreate(id, items: serializers.RequestRHRequired):
     q, values = helper.make_sql(
         "UPDATE",
-        table="event",
+        table="request_rh",
         items=items,
         id=id,
         fields=[
-            "name",
-            "date",
-            "description",
             "user_id",
-            "department_id"
-        ]
+            "content",
+            "registration_date",
+            "visibility",
+            "close",
+            "last_action",
+            "content_history"
+        ],
+        rarray=["content_history"]
     )
     res: CursorResult = db.execute(text(q), values)
     db.commit()

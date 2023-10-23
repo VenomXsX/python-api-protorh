@@ -19,7 +19,7 @@ class User(BaseModel):
     password: str
     firstname: str
     lastname: str
-    birthday_date: NaiveDatetime
+    birthday_date: _date
     address: str
     postal_code: str
     age: int
@@ -44,7 +44,7 @@ class CreateUser(BaseModel):
     password: str
     firstname: str
     lastname: str
-    birthday_date: NaiveDatetime
+    birthday_date: _date
     address: str
     postal_code: str
     age: int
@@ -69,12 +69,12 @@ class UpdateUser(BaseModel):
     password: Optional[str] = None
     firstname: Optional[str] = None
     lastname: Optional[str] = None
-    birthday_date: Optional[NaiveDatetime] = None
+    birthday_date: Optional[_date] = None
     address: Optional[str] = None
     postal_code: Optional[str] = None
     age: Optional[int] = None
     meta: Optional[Dict[str, Any]] = None
-    registration_date: Optional[NaiveDatetime] = None
+    registration_date: Optional[_date] = None
     token: Optional[str] = None
     role: Optional[str] = None
 
@@ -102,16 +102,37 @@ class RequestRH(BaseModel):
     id: int
     user_id: int
     content: str
-    registration_date: NaiveDatetime
+    registration_date: _date
     visibility: bool
     close: bool
-    last_action: NaiveDatetime
-    content_history: List[Json]
+    last_action: _date
+    content_history: List[dict]
+
+
+class RequestRHRequired(BaseModel):
+    user_id: int
+    content: str
+    registration_date: _date
+    visibility: bool
+    close: bool
+    last_action: _date
+    content_history: List[dict]
+
+
+class RequestRHOptional(BaseModel):
+    user_id: Optional[int] = None
+    content: Optional[str] = None
+    registration_date: Optional[_date] = None
+    visibility: Optional[bool] = None
+    close: Optional[bool] = None
+    last_action: Optional[_date] = None
+    content_history: Optional[List[dict]] = None
 
 
 class Event(BaseModel):
     id: int
     name: str
+    date: _date
     date: _date
     description: str
     user_id: int
@@ -120,7 +141,7 @@ class Event(BaseModel):
 
 class EventRequired(BaseModel):
     name: str
-    date: str
+    date: _date
     description: str
     user_id: int
     department_id: int
@@ -128,7 +149,7 @@ class EventRequired(BaseModel):
 
 class EventOptional(BaseModel):
     name: Optional[str] = None
-    date: Optional[str] = None
+    date: Optional[_date] = None
     description: Optional[str] = None
     user_id: Optional[int] = None
     department_id: Optional[int] = None
@@ -137,3 +158,12 @@ class EventOptional(BaseModel):
 class Department(BaseModel):
     id: int
     name: str
+
+
+class TestOptional(BaseModel):
+    name: Optional[str] = None
+    date: Optional[_date] = None
+    number: Optional[int] = None
+    rjson: Optional[dict] = None
+    rarray: Optional[List[dict]] = None
+    opened: Optional[bool] = None
