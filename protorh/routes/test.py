@@ -1,5 +1,5 @@
 from database import SessionLocal
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import text, CursorResult, RowMapping
 from utils import helper
 import serializers
@@ -25,6 +25,11 @@ def GetAll():
     q, _ = helper.make_sql("SELECT", table="test")
     res: RowMapping = db.execute(text(q)).mappings().all()
     db.commit()
+    # raise HTTPException(
+    #     status_code=status.HTTP_401_UNAUTHORIZED,
+    #     detail="You're not authorized",
+    #     headers={"WWW-Authenticate": "Bearer"}
+    # )
     return helper.response(
         200,
         "Test found" if len(res) != 0 else "No test found",
