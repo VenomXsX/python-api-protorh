@@ -1,16 +1,9 @@
-from typing import Optional, List, Union
 import serializers
-from models import User, RequestRH, Event, Department
-from fastapi import APIRouter, HTTPException, status, Depends
-from sqlalchemy import text, CursorResult, RowMapping
-from models import User
+from fastapi import APIRouter, HTTPException, status
+from sqlalchemy import text, CursorResult
 from database import engine
-import json
-from utils.helper import make_sql, response, printer, calc_age
-from lib.auth import get_password_hash, verify_password, hash_djb2, get_user, create_access_token
-from datetime import date
-from env import SALT
-from fastapi.security import OAuth2PasswordRequestForm
+from utils.helper import make_sql, calc_age, formatStringToDate
+from lib.auth import verify_password, get_user, create_access_token
 
 
 router = APIRouter(
@@ -33,7 +26,29 @@ async def connect(form_data: serializers.FormData):
     if not verify_password(form_data.password, hashed_pass):
         raise INVALID_EMAIL_OR_PASS
 
+    # update user age if one yaer is passed
+    await update_age(user)
+
     return {
         "access_token": create_access_token(user, form_data.expire),
         "token_type": "bearer"
     }
+
+
+async def update_age(user: dict[serializers.UserOut, None]):
+    items = user.copy()
+    items["age"] = calc_age(formatStringToDate(items["birthday_date"]))
+    q, values = make_sql(
+        "UPDATE",
+        table="users",
+        items=items,
+        fields=["age"],
+        id=items["id"]
+    )
+    with engine.begin() as conn:
+        result: CursorResult = conn.execute(text(q), values)
+        if result.rowcount == 0:
+            print("Error date and age")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -23,10 +23,15 @@ class TokenData(BaseModel):
     email: Union[str, None] = None
 
 
+# output for get current user
 class UserOut(BaseModel):
     id: int
     email: str
+    firstname: str
+    lastname: str
     role: str
+    age: int
+    birthday_date: _date
 
 
 class UserWithPass(UserOut):

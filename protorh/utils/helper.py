@@ -1,6 +1,6 @@
 from typing import List, Union, Literal
 from sqlalchemy import CursorResult
-from datetime import date
+from datetime import date, datetime
 import json
 
 
@@ -12,6 +12,14 @@ def printer(*items):
     for item in items:
         print(item)
     print("")
+
+
+def formatDateToString(date: date):
+    return date.strftime("%Y-%m-%d")
+
+
+def formatStringToDate(input: str):
+    return datetime.strptime(input, "%Y-%m-%d")
 
 
 def calc_age(birth: date):
@@ -64,7 +72,10 @@ def sql_create(table, items, fields, *, rjson=None, rarray=None):
     select = []
     values = []
     prepare = {}
-    items_dumps = items.model_dump()
+    if type(items) is not dict:
+        items_dumps = items.model_dump()
+    else:
+        items_dumps = items
 
     for val in fields:
         if val in items_dumps and items_dumps[val] is not None:
@@ -112,7 +123,10 @@ def sql_update(table, id, items, fields, *, rjson=None, rarray=None):
 
     values = []
     prepare = {}
-    items_dumps = items.model_dump()
+    if type(items) is not dict:
+        items_dumps = items.model_dump()
+    else:
+        items_dumps = items
 
     prepare["id"] = id
 

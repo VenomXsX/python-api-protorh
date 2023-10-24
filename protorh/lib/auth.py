@@ -2,7 +2,7 @@ from env import SALT, SECRET_KEY
 from jose import JWTError, jwt
 from passlib.hash import md5_crypt
 from database import engine
-from utils.helper import make_sql
+from utils.helper import make_sql, formatDateToString
 from sqlalchemy import text, RowMapping
 from typing import Union, Annotated
 from datetime import datetime, timedelta
@@ -42,13 +42,25 @@ async def get_user(email: str):
         "SELECT",
         table="users",
         email=email,
-        fields=["id", "email", "password", "role"]
+        fields=[
+            "id",
+            "email",
+            "firstname",
+            "lastname",
+            "birthday_date",
+            "age",
+            "password",
+            "role"
+        ]
     )
     with engine.begin() as conn:
         res: RowMapping = conn.execute(
             text(q), values).mappings().all()
     if len(res) > 0 and res[0] is not None:
-        return dict(res[0])
+        user = dict(res[0])
+        # overwrite brith date to format string
+        user["birthday_date"] = formatDateToString(user["birthday_date"])
+        return dict(user)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
