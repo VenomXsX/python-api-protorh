@@ -16,6 +16,7 @@ class MetaModel(BaseModel):
 class FormData(BaseModel):
     email: str
     password: str
+    expire: Optional[int] = None
 
 
 class TokenData(BaseModel):

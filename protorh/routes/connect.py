@@ -34,6 +34,6 @@ async def connect(form_data: serializers.FormData):
         raise INVALID_EMAIL_OR_PASS
 
     return {
-        "access_token": create_access_token(user),
+        "access_token": create_access_token(user, form_data.expire),
         "token_type": "bearer"
     }
