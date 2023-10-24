@@ -8,7 +8,7 @@ from typing import Union, Annotated
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
-from pydantic import BaseModel
+import serializers
 
 
 ALGORITHM = "HS256"
@@ -16,10 +16,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/connect")
-
-
-class TokenData(BaseModel):
-    email: Union[str, None] = None
 
 
 def verify_password(password, hashed):
@@ -46,21 +42,17 @@ async def get_user(email: str):
         "SELECT",
         table="users",
         email=email,
-        fields=["id", "email", "password"]
+        fields=["id", "email", "password", "role"]
     )
     with engine.begin() as conn:
         res: RowMapping = conn.execute(
             text(q), values).mappings().all()
     if len(res) > 0 and res[0] is not None:
-        user = {
-            "id": res[0]["id"],
-            "email": res[0]["email"],
-            "password": res[0]["password"],
-        }
-        return user
+        return dict(res[0])
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    # define error
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -71,13 +63,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         email: str = payload.get("email")
         if email is None:
             raise credentials_exception
-        token_data = TokenData(email=email)
+        token_data = serializers.TokenData(email=email)
     except JWTError:
         raise credentials_exception
     user = get_user(token_data.email)
     if user is None:
         raise credentials_exception
-    return user
+    return serializers.UserOut(**await user)
 
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):

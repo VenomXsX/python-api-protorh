@@ -27,8 +27,13 @@ async def get_all():
 
 
 @router.get("/me")
-async def get_me(user: Annotated[serializers.UserWithPass, Depends(get_current_user)]):
-    return await user
+async def get_me(current_user: Annotated[serializers.UserWithPass, Depends(get_current_user)]):
+    # if user["role"] != "admin":
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="wesh t'es pas autorisé"
+    #     )
+    return current_user
 
 
 # get user by id

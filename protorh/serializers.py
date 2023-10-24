@@ -18,9 +18,14 @@ class FormData(BaseModel):
     password: str
 
 
+class TokenData(BaseModel):
+    email: Union[str, None] = None
+
+
 class UserOut(BaseModel):
     id: int
     email: str
+    role: str
 
 
 class UserWithPass(UserOut):
