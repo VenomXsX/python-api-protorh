@@ -1,13 +1,13 @@
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Annotated
 import serializers
 from models import User, RequestRH, Event, Department
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, CursorResult, RowMapping
 from models import User
 from database import engine
 import json
 from utils.helper import make_sql, response, printer, calc_age
-from lib.auth import get_password_hash, verify_password, hash_djb2, get_user
+from lib.auth import get_password_hash, verify_password, hash_djb2, get_user, get_current_user
 from datetime import date
 from env import SALT
 
@@ -24,6 +24,11 @@ async def get_all():
     with engine.begin() as conn:
         result: RowMapping = conn.execute(text(q)).mappings().all()
     return result
+
+
+@router.get("/me")
+async def get_me(user: Annotated[serializers.UserWithPass, Depends(get_current_user)]):
+    return await user
 
 
 # get user by id
