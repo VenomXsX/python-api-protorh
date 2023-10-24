@@ -78,10 +78,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = serializers.TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = get_user(token_data.email)
+    user = await get_user(token_data.email)
     if user is None:
         raise credentials_exception
-    return serializers.UserOut(**await user)
+    return serializers.UserOut(**user)
 
 
 def create_access_token(data: dict, expires_delta: Union[int, None] = None):

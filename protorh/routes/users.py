@@ -1,14 +1,10 @@
-from typing import Optional, List, Union, Annotated
+from typing import List, Union, Annotated
 import serializers
-from models import User, RequestRH, Event, Department
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, CursorResult, RowMapping
-from models import User
 from database import engine
-import json
-from utils.helper import make_sql, response, printer, calc_age
-from lib.auth import get_password_hash, verify_password, hash_djb2, get_user, get_current_user
-from datetime import date
+from utils.helper import make_sql, response, calc_age
+from lib.auth import get_password_hash, hash_djb2, get_user, get_current_user
 from env import SALT
 
 router = APIRouter(
@@ -52,7 +48,7 @@ async def get(id):
 @router.post("/create", summary="Create new user")
 async def create(items: serializers.CreateUser):
     # check if user already exist
-    user = get_user(items.email)
+    user = await get_user(items.email)
     if user is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -70,7 +66,6 @@ async def create(items: serializers.CreateUser):
     items.password = get_password_hash(items.password)
     items.age = calc_age(items.birthday_date)
     items.meta = {}
-    items.registration_date = date.today()
     items.token = hash_djb2(
         items.email + items.firstname + items.lastname + SALT
     )
