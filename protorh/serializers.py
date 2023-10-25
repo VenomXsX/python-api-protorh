@@ -141,7 +141,10 @@ class UpdateUser(BaseModel):
 
 
 class UpdatePasswordUser(BaseModel):
+    email: str
     password: str
+    new_password: str
+    repeat_new_password: str
 
 
 class UploadProfilePictureData(BaseModel):

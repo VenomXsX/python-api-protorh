@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, CursorResult, RowMapping
 from database import engine
 from utils.helper import make_sql, response, calc_age
-from lib.auth import get_password_hash, hash_djb2, get_user, get_current_user
+from lib.auth import get_password_hash, hash_djb2, get_user, get_current_user, verify_password
 from env import SALT
 
 router = APIRouter(
@@ -129,26 +129,50 @@ async def delete(id: int):
 
 
 # update a specific user column(s)
-@router.put("/update/{id}")
-async def update(id, items: serializers.UpdateUser):
-    q, values = make_sql("UPDATE",
-                         table="users",
-                         id=id,
-                         items=items,
-                         fields=[
-                             "email",
-                             "password",
-                             "firstname",
-                             "lastname",
-                             "birthday_date",
-                             "address",
-                             "postal_code",
-                             "age",
-                             "meta",
-                             "registration_date",
-                             "token",
-                             "role"],
-                         rjson=["meta"])
+@router.patch("/update/{id}")
+async def update(id, items: serializers.UpdateUser, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+    forbiddenFields = ["password", "token"]
+    fields = [
+        "email",
+        "birthday_date",
+        "address",
+        "postal_code",
+        "age",
+        "meta",
+        "registration_date",
+    ]
+    adminFields = [
+        "firstname", "lastname", "role"
+    ]
+    items_dump = items.model_dump()
+    # check forbidden
+    for field in forbiddenFields:
+        if items_dump[field] is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You cannot update '{field}' with this endpoint"
+            )
+
+    # check admin
+    if current_user.role == "admin":
+        fields.extend(adminFields)
+    else:
+        # check user forbidden fields
+        for field in adminFields:
+            if items_dump[field] is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"You cannot update: {field}"
+                )
+
+    q, values = make_sql(
+        "UPDATE",
+        table="users",
+        id=id,
+        items=items,
+        fields=fields,
+        rjson=["meta"]
+    )
     with engine.begin() as conn:
         result: CursorResult = conn.execute(text(q), values)
     if result.rowcount == 0:
@@ -157,18 +181,39 @@ async def update(id, items: serializers.UpdateUser):
 
 
 # update password for specific user
-@router.put("/update/password/{id}")
-async def update_password(id: int, content: serializers.UpdatePasswordUser):
-    q = text("UPDATE users SET password = :password WHERE id = :id")
-    values = {
-        "password": content.password,
-        "id": id
-    }
+@router.patch("/password")
+async def update_password(items: serializers.UpdatePasswordUser):
+
+    user = await get_user(items.email)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email or password invalid E"
+        )
+    if not verify_password(items.password, user["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email or password invalid P"
+        )
+    if items.new_password != items.repeat_new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password and repeat password does not match"
+        )
+
+    items.password = get_password_hash(items.new_password)
+    q, values = make_sql(
+        "UPDATE",
+        table="users",
+        items=items,
+        email=items.email,
+        fields=["password"]
+    )
     with engine.begin() as conn:
-        result: CursorResult = conn.execute(q, values)
+        result: CursorResult = conn.execute(text(q), values)
         if result.rowcount == 0:
             return "Something went wrong and 0 rows affected"
-    return f"User id {id}'s password has been updated"
+    return "User's password has been updated"
 
 
 # update profile picture for specific user

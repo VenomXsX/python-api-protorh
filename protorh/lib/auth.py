@@ -60,7 +60,7 @@ async def get_user(email: str):
         user = dict(res[0])
         # overwrite brith date to format string
         user["birthday_date"] = formatDateToString(user["birthday_date"])
-        return dict(user)
+        return user
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):

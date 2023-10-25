@@ -44,20 +44,29 @@ def missing(name: str):
     return f"Missing '{name}' in UPDATE method"
 
 
-def sql_select(table, *, fields=None, id=None, email=None):
+def sql_where(id=None, email=None):
+    """
+    return `where` and `prepare`
+    """
     if id is not None and email is not None:
         raise Exception(
-            "For SELECT method you can only pass one 'id' or 'email'")
-
-    select = ", ".join(fields) if fields is not None else "*"
-    where = ""
+            "For SELECT method you can only pass one 'id' or 'email'"
+        )
     prepare = {}
+    where = ""
     if id is not None:
-        where = " WHERE id = :id LIMIT 1"
+        where = "WHERE id = :id"
         prepare["id"] = id
     if email is not None:
-        where = " WHERE email = :email LIMIT 1"
+        where = "WHERE email = :email"
         prepare["email"] = email
+
+    return where, prepare
+
+
+def sql_select(table, *, fields=None, id=None, email=None):
+    select = ", ".join(fields) if fields is not None else "*"
+    where, prepare = sql_where(id, email)
 
     return trim(f"SELECT {select} FROM {table} {where}"), prepare
 
@@ -105,30 +114,28 @@ def sql_create(table, items, fields, *, rjson=None, rarray=None):
     return trim(f"INSERT INTO {table} ({select}) VALUES ({values})"), prepare
 
 
-def sql_delete(table, id):
+def sql_delete(table, id=None, email=None):
     if id is None:
         raise Exception(missing("id"))
-    prepare = {}
-    prepare["id"] = id
-    return f"DELETE FROM {table} WHERE id = :id", prepare
+
+    where, prepare = sql_where(id, email)
+
+    return f"DELETE FROM {table} {where}", prepare
 
 
-def sql_update(table, id, items, fields, *, rjson=None, rarray=None):
-    if id is None:
-        raise Exception(missing("id"))
+def sql_update(table, items, fields, *, id=None, email=None, rjson=None, rarray=None):
     if fields is None:
         raise Exception(missing("fields"))
     if items is None:
         raise Exception(missing("items"))
 
     values = []
-    prepare = {}
+    where, prepare = sql_where(id, email)
+
     if type(items) is not dict:
         items_dumps = items.model_dump()
     else:
         items_dumps = items
-
-    prepare["id"] = id
 
     for val in fields:
         if val in items_dumps and items_dumps[val] is not None:
@@ -152,7 +159,7 @@ def sql_update(table, id, items, fields, *, rjson=None, rarray=None):
 
     values = ", ".join(values)
 
-    return f"UPDATE {table} SET {values} WHERE id = :id", prepare
+    return f"UPDATE {table} SET {values} {where}", prepare
 
 
 def make_sql(
@@ -178,10 +185,11 @@ def make_sql(
     if q == "CREATE":
         res = sql_create(table, items, fields, rjson=rjson, rarray=rarray)
     if q == "DELETE":
-        res = sql_delete(table, id)
+        res = sql_delete(table, id, email)
     if q == "UPDATE":
-        res = sql_update(table, id, items, fields,
-                         rjson=rjson, rarray=rarray)
+        res = sql_update(
+            table, items, fields, id=id,
+            email=email, rjson=rjson, rarray=rarray)
     return res
 
 
