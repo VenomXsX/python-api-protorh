@@ -1,5 +1,5 @@
 from env import SALT, SECRET_KEY
-from jose import JWTError, jwt
+from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.hash import md5_crypt
 from database import engine
 from utils.helper import make_sql, formatDateToString
@@ -77,8 +77,16 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         if email is None:
             raise credentials_exception
         token_data = serializers.TokenData(email=email)
+
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except JWTError:
         raise credentials_exception
+
     user = await get_user(token_data.email)
     if user is None:
         raise credentials_exception
