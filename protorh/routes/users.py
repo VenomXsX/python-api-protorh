@@ -13,6 +13,8 @@ router = APIRouter(
 )
 
 
+# Endpoint : /api/user
+# Type : GET
 # get all users
 @router.get("/", response_model=List[serializers.User])
 async def get_all():
@@ -22,8 +24,11 @@ async def get_all():
     return result
 
 
+# Endpoint : /api/user/{id_user}
+# Type : GET
+# get me
 @router.get("/me")
-async def get_me(current_user: Annotated[serializers.UserWithPass, Depends(get_current_user)]):
+async def get_me(current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     # if user["role"] != "admin":
     #     raise HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -32,18 +37,25 @@ async def get_me(current_user: Annotated[serializers.UserWithPass, Depends(get_c
     return current_user
 
 
+# Endpoint : /api/user/{id_user}
+# Type : GET
 # get user by id
-@router.get("/{id}", response_model=Union[serializers.User, str])
-async def get(id):
-    q = text("SELECT * FROM users WHERE id = :id")
-    values = {"id": id}
+@router.get("/{id}", response_model=Union[serializers.UserAdminView, serializers.UserView, str])
+async def get(id, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+    q, values = make_sql("SELECT", table="users", id=id)
     with engine.begin() as conn:
-        result: RowMapping = conn.execute(q, values).mappings().all()
+        result: RowMapping = conn.execute(text(q), values).mappings().all()
         if len(result) == 0:
             return f"User id {id} doesn't exist"
-    return result[0]
+
+    if current_user.role == "admin":
+        return serializers.UserAdminView(**dict(result[0]))
+
+    return serializers.UserView(**dict(result[0]))
 
 
+# Endpoint : /api/user/create
+# Type : POST
 # add a new user
 @router.post("/create", summary="Create new user")
 async def create(items: serializers.CreateUser):

@@ -38,6 +38,31 @@ class UserWithPass(UserOut):
     password: str
 
 
+class UserAdminView(BaseModel):
+    id: int
+    email: str
+    firstname: str
+    lastname: str
+    birthday_date: _date
+    address: str
+    postal_code: str
+    age: int
+    meta: dict
+    registration_date: _date
+    token: str
+    role: str
+
+
+class UserView(BaseModel):
+    id: int
+    email: str
+    firstname: str
+    lastname: str
+    age: int
+    registration_date: _date
+    role: str
+
+
 class User(BaseModel):
     id: int
     email: str
