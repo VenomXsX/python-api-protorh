@@ -1,10 +1,66 @@
 from sqlalchemy.ext.declarative import declarative_base
-from pydantic import BaseModel
-from typing import List, Optional, Union
+from pydantic import BaseModel, validator, ValidationError
+from typing import List, Optional, Union, Any, Dict
 from datetime import date as _date
+from sqlalchemy import CursorResult, RowMapping
+import json
 
 
 Base = declarative_base()
+
+
+class MetaModel(BaseModel):
+    profile_picture: str
+
+
+class FormData(BaseModel):
+    email: str
+    password: str
+    expire: Optional[int] = None
+
+
+class TokenData(BaseModel):
+    email: Union[str, None] = None
+
+
+# output for get current user
+class UserOut(BaseModel):
+    id: int
+    email: str
+    firstname: str
+    lastname: str
+    role: str
+    age: int
+    birthday_date: _date
+
+
+class UserWithPass(UserOut):
+    password: str
+
+
+class UserAdminView(BaseModel):
+    id: int
+    email: str
+    firstname: str
+    lastname: str
+    birthday_date: _date
+    address: str
+    postal_code: str
+    age: int
+    meta: dict
+    registration_date: _date
+    token: str
+    role: str
+
+
+class UserView(BaseModel):
+    id: int
+    email: str
+    firstname: str
+    lastname: str
+    age: int
+    registration_date: _date
+    role: str
 
 
 class User(BaseModel):
@@ -17,40 +73,83 @@ class User(BaseModel):
     address: str
     postal_code: str
     age: int
-    meta: str
+    meta: dict
     registration_date: _date
     token: str
     role: str
+
+    # @validator("meta")
+    # def validate_meta(cls, value):
+    #     try:
+    #         # Try to parse the dictionary as a MetaModel
+    #         meta_model = MetaModel(**value)
+    #         return value
+    #     except ValidationError as e:
+    #         # If validation fails, raise an error
+    #         raise ValueError(f"Invalid meta: {e}")
 
 
 class CreateUser(BaseModel):
     email: str
     password: str
+    confirm_pass: str
     firstname: str
     lastname: str
     birthday_date: _date
     address: str
     postal_code: str
-    age: int
-    meta: str
-    registration_date: _date
-    token: str
-    role: str
+    age: Optional[int] = None
+    meta: Optional[dict] = None
+    registration_date: Optional[_date] = None
+    token: Optional[str] = None
+    role: Optional[str] = None
+
+    # @validator("meta")
+    # def validate_meta(cls, value):
+    #     try:
+    #         # Try to parse the dictionary as a MetaModel
+    #         meta_model = MetaModel(**value)
+    #         return value
+    #     except ValidationError as e:
+    #         # If validation fails, raise an error
+    #         raise ValueError(f"Invalid meta: {e}")
 
 
 class UpdateUser(BaseModel):
-    email: Optional[str]
-    password: Optional[str]
-    firstname: Optional[str]
-    lastname: Optional[str]
-    birthday_date: Optional[_date]
-    address: Optional[str]
-    postal_code: Optional[str]
-    age: Optional[int]
-    meta: Optional[str]
-    registration_date: Optional[_date]
-    token: Optional[str]
-    role: Optional[str]
+    email: Optional[str] = None
+    password: Optional[str] = None
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    birthday_date: Optional[_date] = None
+    address: Optional[str] = None
+    postal_code: Optional[str] = None
+    age: Optional[int] = None
+    meta: Optional[Dict[str, Any]] = None
+    registration_date: Optional[_date] = None
+    token: Optional[str] = None
+    role: Optional[str] = None
+
+    # @validator("meta")
+    # def validate_meta(cls, value):
+    #     try:
+    #         # Try to parse the dictionary as a MetaModel
+    #         meta_model = MetaModel(**value)
+    #         return value
+    #     except ValidationError as e:
+    #         # If validation fails, raise an error
+    #         raise ValueError(f"Invalid meta: {e}")
+
+
+class UpdatePasswordUser(BaseModel):
+    email: str
+    password: str
+    new_password: str
+    repeat_new_password: str
+
+
+class UploadProfilePictureData(BaseModel):
+    id: int
+    path: str
 
 
 class RequestRH(BaseModel):
@@ -87,6 +186,7 @@ class RequestRHOptional(BaseModel):
 class Event(BaseModel):
     id: int
     name: str
+    date: _date
     date: _date
     description: str
     user_id: int

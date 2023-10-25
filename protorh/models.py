@@ -33,7 +33,7 @@ class User(Base):
 class RequestRH(Base):
     __tablename__ = "request_rh"
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)
     content = Column(String, nullable=True)
     registration_date = Column(Date, server_default=func.now(), nullable=False)
     visibility = Column(Boolean, nullable=True)
@@ -48,7 +48,7 @@ class Event(Base):
     name = Column(String, nullable=True)
     date = Column(Date, nullable=True)
     description = Column(String, nullable=True)
-    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)
     department_id = Column(BigInteger, ForeignKey(
         "department.id"), nullable=True)
 

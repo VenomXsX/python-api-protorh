@@ -1,11 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 import sys
 
 # routes imports
-from routes import events, requestRH, test
+from routes import events, requestRH, test, users, connect
 
 # run on diffenrent port with args if not working
 if len(sys.argv) > 1:
@@ -55,12 +53,24 @@ app = FastAPI(
 app.include_router(events.router, prefix="/api")
 app.include_router(requestRH.router, prefix="/api")
 app.include_router(test.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(connect.router, prefix="/api")
 
 
-# default route
+# Endpoint : /
+# Type : GET
+# return API is working
 @app.get("/")
-def root():
+async def root():
     return "REST API is working yey"
+
+
+# Endpoint : /api/hello
+# Type : GET
+# this endpoint return à json string containing "Hello world !"
+@app.get("/api/hello")
+async def hello():
+    return {"message": "hello world !"}
 
 
 if __name__ == "__main__":
