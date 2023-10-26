@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import sys
 
 # routes imports
-from routes import events, requestRH, test, users, connect
+from routes import events, requestRH, test, users, connect, upload
 
 # run on diffenrent port with args if not working
 if len(sys.argv) > 1:
@@ -55,6 +55,7 @@ app.include_router(requestRH.router, prefix="/api")
 app.include_router(test.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(connect.router, prefix="/api")
+app.include_router(upload.router, prefix="/api")
 
 
 # Endpoint : /
