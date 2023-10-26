@@ -2,10 +2,10 @@ from env import SALT, SECRET_KEY
 from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.hash import md5_crypt
 from database import engine
-from utils.helper import make_sql, formatDateToString
+from utils.helper import make_sql, formatDateToString, check_id_email
 from sqlalchemy import text, RowMapping
 from typing import Union, Annotated
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 import serializers
@@ -37,29 +37,25 @@ def hash_djb2(s):
     return hash & 0xFFFFFFFF
 
 
-async def get_user(email: str):
+async def get_user(email=None, id=None):
+    check_id_email(id, email)
+
     q, values = make_sql(
         "SELECT",
         table="users",
         email=email,
-        fields=[
-            "id",
-            "email",
-            "firstname",
-            "lastname",
-            "birthday_date",
-            "age",
-            "password",
-            "role"
-        ]
+        id=id
     )
     with engine.begin() as conn:
         res: RowMapping = conn.execute(
             text(q), values).mappings().all()
     if len(res) > 0 and res[0] is not None:
         user = dict(res[0])
-        # overwrite brith date to format string
-        user["birthday_date"] = formatDateToString(user["birthday_date"])
+        # overwrite all date to format string
+        # 'cause will cause error
+        for key in user:
+            if type(user[key]) == date:
+                user[key] = formatDateToString(user[key])
         return user
 
 
