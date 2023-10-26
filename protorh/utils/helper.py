@@ -2,6 +2,7 @@ from typing import List, Union, Literal
 from sqlalchemy import CursorResult
 from datetime import date, datetime
 import json
+import os
 
 
 SQL_METHOD = Literal["SELECT", "CREATE", "UPDATE", "DELETE"]
@@ -12,6 +13,13 @@ def printer(*items):
     for item in items:
         print(item)
     print("")
+
+
+def find_file_by_name(name, path):
+    for root, _, files in os.walk(path):
+        for item in files:
+            if name in item:
+                return os.path.join(root, item)
 
 
 def formatDateToString(date: date):

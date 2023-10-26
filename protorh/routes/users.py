@@ -1,14 +1,12 @@
 from typing import List, Union, Annotated
 import serializers
-from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, CursorResult, RowMapping
 from database import engine
-from utils.helper import make_sql, response, calc_age, printer
+from utils.helper import make_sql, response, calc_age
 from lib.auth import get_password_hash, hash_djb2, get_user, get_current_user, verify_password
 from env import SALT
-import shutil
-import os
+
 
 router = APIRouter(
     prefix='/user',
@@ -217,63 +215,3 @@ async def update_password(items: serializers.UpdatePasswordUser):
         if result.rowcount == 0:
             return "Something went wrong and 0 rows affected"
     return "User's password has been updated"
-
-
-@router.post("/upload/picture/user/{id}")
-async def upload_pic(id, image: UploadFile = File()):
-    if not image:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No file provided"
-        )
-    # check user
-    user = await get_user(id=id)
-    if not user:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "type": "user_error",
-                "error": "User not found"
-            }
-        )
-    # check file type
-    if not image.content_type in ["image/jpeg", "image/png", "image/gif"]:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "type": "image_type",
-                "error": "Image type is not: gif, png or jpg"
-            }
-        )
-    path = os.path.relpath("./assets/picture/profiles")
-    # check if dir exist
-    if not os.path.exists(path):
-        os.makedirs(path)
-    # save file with token as filename
-    try:
-        with open(f"{path}/{user['token']}.{image.filename.split('.')[-1]}", "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-    except shutil.Error as err:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "type": "upload_error",
-                "error": err
-            }
-        )
-
-    return {"message": "file uploaded"}
-
-# update profile picture for specific user
-# @router.put("/upload/picture/{id}")
-# async def upload_profile_picture(data: serializers.UploadProfilePictureData):
-#     with engine.begin() as conn:
-#         result: RowMapping = conn.execute(
-#             text(f"SELECT meta FROM users WHERE id = {id}")).mappings().all()
-#         meta = result[0].meta
-#         meta["path"] = data.path
-#         q, values = make_sql("UPDATE", table="users", id=data.id, items="")
-#         result: CursorResult = conn.execute(q, values)
-#         if result.rowcount == 0:
-#             return "Something went wrong and 0 rows affected"
-#     return f"User id {data.id}'s profile picture has been updated"
