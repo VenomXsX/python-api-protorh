@@ -1,7 +1,7 @@
 from database import SessionLocal
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import text, CursorResult, RowMapping
-from utils.helper import make_sql, response, printer
+from utils.helper import make_sql, response, printer, check_id_email
 import serializers
 from lib.auth import verify_password, get_password_hash
 from pydantic import BaseModel
@@ -18,19 +18,21 @@ db = SessionLocal()
 
 @router.get("/")
 def GetAll():
-    q, _ = make_sql("SELECT", table="test")
-    res: RowMapping = db.execute(text(q)).mappings().all()
-    db.commit()
+    check_id_email(id="s", email="azd")
+    return "ok"
+    # q, _ = make_sql("SELECT", table="test")
+    # res: RowMapping = db.execute(text(q)).mappings().all()
+    # db.commit()
     # raise HTTPException(
     #     status_code=status.HTTP_401_UNAUTHORIZED,
     #     detail="You're not authorized",
     #     headers={"WWW-Authenticate": "Bearer"}
     # )
-    return response(
-        200,
-        "Test found" if len(res) != 0 else "No test found",
-        data=res
-    )
+    # return response(
+    #     200,
+    #     "Test found" if len(res) != 0 else "No test found",
+    #     data=res
+    # )
 
 
 @router.get("/{id}")

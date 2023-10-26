@@ -11,3 +11,5 @@ use `/api` route at start
 - `serializers.py`: Pydantic data validation declarations
 - `database.py`: Create and connect to database
 - `create_db.py`: Create all the tables in the database
+
+- `assets`: auto create

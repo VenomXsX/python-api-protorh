@@ -44,14 +44,23 @@ def missing(name: str):
     return f"Missing '{name}' in UPDATE method"
 
 
-def sql_where(id=None, email=None):
+def check_id_email(id=None, email=None):
+    if id is None and email is None:
+        raise Exception(
+            "Check_Id_Email(): please pass an id or email"
+        )
+    if id is not None and email is not None:
+        raise Exception(
+            "Check_Id_Email(): Can't pass both 'id' and 'email', please pass just 'id' or just 'email'"
+        )
+
+
+def sql_where(id=None, email=None, ):
     """
     return `where` and `prepare`
     """
-    if id is not None and email is not None:
-        raise Exception(
-            "For SELECT method you can only pass one 'id' or 'email'"
-        )
+    check_id_email(id, email)
+
     prepare = {}
     where = ""
     if id is not None:
@@ -115,9 +124,6 @@ def sql_create(table, items, fields, *, rjson=None, rarray=None):
 
 
 def sql_delete(table, id=None, email=None):
-    if id is None:
-        raise Exception(missing("id"))
-
     where, prepare = sql_where(id, email)
 
     return f"DELETE FROM {table} {where}", prepare
