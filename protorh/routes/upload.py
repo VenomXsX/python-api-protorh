@@ -34,9 +34,9 @@ async def get_pic(id):
 
     token = user["token"]
 
-    filename = find_file_by_name(token, path)
+    file_path, file_ext = find_file_by_name(token, path)
 
-    if not filename:
+    if not file_path:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
@@ -45,7 +45,7 @@ async def get_pic(id):
             }
         )
 
-    return FileResponse(filename)
+    return FileResponse(file_path, filename="image." + file_ext)
 
 
 # Endpoint : /api/upload/picture/user/{id}

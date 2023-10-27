@@ -19,7 +19,7 @@ def find_file_by_name(name, path):
     for root, _, files in os.walk(path):
         for item in files:
             if name in item:
-                return os.path.join(root, item)
+                return os.path.join(root, item), item.split(".")[-1]
 
 
 def formatDateToString(date: date):
