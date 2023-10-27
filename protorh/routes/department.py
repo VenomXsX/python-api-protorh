@@ -1,11 +1,10 @@
-from typing import List, Union, Annotated
+from typing import List, Annotated
 import serializers
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, CursorResult, RowMapping
 from database import engine
-from utils.helper import make_sql, response, calc_age
-from lib.auth import get_password_hash, hash_djb2, get_user, get_current_user, verify_password
-from env import SALT
+from utils.helper import make_sql
+from lib.auth import get_current_user
 
 
 router = APIRouter(
