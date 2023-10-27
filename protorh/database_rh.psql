@@ -5,7 +5,7 @@ create database postgres;
 \c postgres;
 
 -- CREATE THE TABLES
-create table
+create table if not exists
   public.users (
     id bigserial,
     email character varying null,
@@ -20,15 +20,17 @@ create table
     registration_date date not null default now(),
     token character varying null,
     role character varying null,
-    constraint user_pkey primary key (id)
+    department_id bigint null,
+    constraint users_pkey primary key (id),
+    constraint users_department_id_fkey foreign key (department_id) references department (id)
   ) tablespace pg_default;
 
-create index if not exists ix_user_id on public."users" using btree (id) tablespace pg_default;
+create index if not exists ix_users_id on public.users using btree (id) tablespace pg_default;
 
-create table
+create table if not exists
   public.request_rh (
     id bigserial,
-    user_id bigserial null,
+    user_id bigint null,
     content character varying null,
     registration_date date not null default now(),
     visibility boolean null,
@@ -36,13 +38,13 @@ create table
     last_action date null,
     content_history json[] null,
     constraint request_rh_pkey primary key (id),
-    constraint request_rh_user_id_fkey foreign key (user_id) references "users" (id)
+    constraint request_rh_user_id_fkey foreign key (user_id) references users (id)
   ) tablespace pg_default;
 
 create index if not exists ix_request_rh_id on public.request_rh using btree (id) tablespace pg_default;
 
 
-create table
+create table if not exists
   public.department (
     id bigserial,
     name character varying null,
@@ -52,7 +54,7 @@ create table
 create index if not exists ix_department_id on public.department using btree (id) tablespace pg_default;
 
 
-create table
+create table if not exists
   public.event (
     id bigserial,
     name character varying null,
@@ -62,7 +64,7 @@ create table
     department_id bigint null,
     constraint event_pkey primary key (id),
     constraint event_department_id_fkey foreign key (department_id) references department (id),
-    constraint event_user_id_fkey foreign key (user_id) references "users" (id)
+    constraint event_user_id_fkey foreign key (user_id) references users (id)
   ) tablespace pg_default;
 
 create index if not exists ix_event_id on public.event using btree (id) tablespace pg_default;
