@@ -28,6 +28,8 @@ class User(Base):
     registration_date = Column(Date, server_default=func.now(), nullable=False)
     token = Column(String, nullable=True)
     role = Column(String, nullable=True)
+    department_id = Column(BigInteger, ForeignKey(
+        "department.id"), nullable=True)
 
 
 class RequestRH(Base):
