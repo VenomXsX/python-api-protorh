@@ -52,22 +52,23 @@ def missing(name: str):
     return f"Missing '{name}' in UPDATE method"
 
 
-def check_id_email(id=None, email=None):
-    if id is None and email is None:
-        raise Exception(
-            "Check_Id_Email(): please pass an id or email"
-        )
+def check_id_email(id=None, email=None, optional=None):
+    if not optional:
+        if id is None and email is None:
+            raise Exception(
+                "Check_Id_Email(): please pass an id or email"
+            )
     if id is not None and email is not None:
         raise Exception(
             "Check_Id_Email(): Can't pass both 'id' and 'email', please pass just 'id' or just 'email'"
         )
 
 
-def sql_where(id=None, email=None, ):
+def sql_where(id=None, email=None, optional=None):
     """
     return `where` and `prepare`
     """
-    check_id_email(id, email)
+    check_id_email(id, email, optional)
 
     prepare = {}
     where = ""
@@ -83,7 +84,7 @@ def sql_where(id=None, email=None, ):
 
 def sql_select(table, *, fields=None, id=None, email=None):
     select = ", ".join(fields) if fields is not None else "*"
-    where, prepare = sql_where(id, email)
+    where, prepare = sql_where(id, email, True)
 
     return trim(f"SELECT {select} FROM {table} {where}"), prepare
 

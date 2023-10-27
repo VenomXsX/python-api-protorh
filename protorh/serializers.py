@@ -51,6 +51,7 @@ class UserAdminView(BaseModel):
     registration_date: _date
     token: str
     role: str
+    department_id: int
 
 
 class UserView(BaseModel):
@@ -61,6 +62,7 @@ class UserView(BaseModel):
     age: int
     registration_date: _date
     role: str
+    department_id: int
 
 
 class User(BaseModel):
@@ -212,6 +214,14 @@ class EventOptional(BaseModel):
 class Department(BaseModel):
     id: int
     name: str
+
+
+class DepartmentRequired(BaseModel):
+    name: str
+
+
+class DepartmentOptional(BaseModel):
+    name: Optional[str] = None
 
 
 class TestOptional(BaseModel):
