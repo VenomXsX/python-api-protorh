@@ -16,6 +16,7 @@ router = APIRouter(
 
 # Endpoint : /api/user
 # Type : GET
+# JWT required : False
 # get all users
 @router.get("/", response_model=List[serializers.User])
 async def get_all():
@@ -27,19 +28,16 @@ async def get_all():
 
 # Endpoint : /api/user/{id_user}
 # Type : GET
+# JWT required : True
 # get me
 @router.get("/me")
 async def get_me(current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
-    # if user["role"] != "admin":
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="wesh t'es pas autorisé"
-    #     )
     return current_user
 
 
 # Endpoint : /api/user/{id_user}
 # Type : GET
+# JWT required : True
 # get user by id
 @router.get("/{id}", response_model=Union[serializers.UserAdminView, serializers.UserView, str])
 async def get(id, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
@@ -57,6 +55,7 @@ async def get(id, current_user: Annotated[serializers.UserOut, Depends(get_curre
 
 # Endpoint : /api/user/create
 # Type : POST
+# JWT required : False
 # add a new user
 @router.post("/create", summary="Create new user")
 async def create(items: serializers.CreateUser):
@@ -115,6 +114,9 @@ async def create(items: serializers.CreateUser):
     return values
 
 
+# Endpoint : /api/user/delete
+# Type : DELETE
+# JWT required : False
 # delete user by id
 @router.delete("/delete/{id}", response_model=str)
 async def delete(id: int):
@@ -129,6 +131,9 @@ async def delete(id: int):
     return f"User id {id} removed from Users"
 
 
+# Endpoint : /api/user/update/{user_id}
+# Type : PATCH
+# JWT required : True
 # update a specific user column(s)
 @router.patch("/update/{id}")
 async def update(id, items: serializers.UpdateUser, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
@@ -181,6 +186,9 @@ async def update(id, items: serializers.UpdateUser, current_user: Annotated[seri
     return response(200, "Successfully updated, id: " + id, data=values, res=result)
 
 
+# Endpoint : /api/password
+# Type : PATCH
+# JWT required : False
 # update password for specific user
 @router.patch("/password")
 async def update_password(items: serializers.UpdatePasswordUser):
