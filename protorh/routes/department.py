@@ -65,13 +65,10 @@ async def department_users_get(department_id: int, current_user: Annotated[seria
         "SELECT * "
         "FROM users u "
         "JOIN department d ON u.department_id = d.id "
-        "WHERE d.id = :id"
+        f"WHERE d.id = {department_id}"
     )
-    values = {
-        "id": department_id
-    }
     with engine.begin() as conn:
-        result: RowMapping = conn.execute(q, values).mappings().all()
+        result: RowMapping = conn.execute(q).mappings().all()
         users = []
         for item in result:
             # apprend views depend on user role
@@ -94,7 +91,7 @@ async def department_users_get(department_id: int, current_user: Annotated[seria
 # JWT required : True
 # add users in department
 @router.post("/{department_id}/users/add")
-async def department_users_add(department_id, user_ids: List[int], current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+async def department_users_add(department_id: int, user_ids: List[int], current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -105,14 +102,11 @@ async def department_users_add(department_id, user_ids: List[int], current_user:
     update_user_ids = ",".join(map(str, user_ids))
     q = text(
         "UPDATE users "
-        "SET department_id = :id "
+        f"SET department_id = {department_id} "
         f"WHERE id IN ({update_user_ids})"
     )
-    values = {
-        "id": department_id,
-    }
     with engine.begin() as conn:
-        result: CursorResult = conn.execute(q, values)
+        result: CursorResult = conn.execute(q)
     return f"updated successfully, {result.rowcount} affected"
 
 
@@ -121,7 +115,7 @@ async def department_users_add(department_id, user_ids: List[int], current_user:
 # JWT required : True
 # remove users from department
 @router.post("/{department_id}/users/remove")
-async def department_users_add(department_id, user_ids: List[int], current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+async def department_users_remove(department_id: int, user_ids: List[int], current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -132,8 +126,8 @@ async def department_users_add(department_id, user_ids: List[int], current_user:
     q = text(
         "UPDATE users "
         "SET department_id = null "
-        f"WHERE id IN ({update_user_ids})"
+        f"WHERE department_id = {department_id} AND id IN ({update_user_ids})"
     )
     with engine.begin() as conn:
         result: CursorResult = conn.execute(q)
-    return f"updated successfully, {result.rowcount} affected"
+    return f"deleted successfully, {result.rowcount} affected"
