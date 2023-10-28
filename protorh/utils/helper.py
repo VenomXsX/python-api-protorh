@@ -28,6 +28,7 @@ def formatDateToString(date: date):
 
 def formatStringToDate(input: str):
     return datetime.strptime(input, "%Y-%m-%d")
+    # return datetime.strptime(input, "%Y-%m-%d %H:%M:%S")
 
 
 def calc_age(birth: date):

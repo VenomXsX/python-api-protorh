@@ -165,24 +165,28 @@ class RequestRH(BaseModel):
     content_history: List[dict]
 
 
-class RequestRHRequired(BaseModel):
+class RequestRHInput(BaseModel):
     user_id: int
     content: str
-    registration_date: _date
-    visibility: bool
-    close: bool
-    last_action: _date
-    content_history: List[dict]
-
-
-class RequestRHOptional(BaseModel):
-    user_id: Optional[int] = None
-    content: Optional[str] = None
     registration_date: Optional[_date] = None
     visibility: Optional[bool] = None
     close: Optional[bool] = None
     last_action: Optional[_date] = None
     content_history: Optional[List[dict]] = None
+
+
+class RequestRHId(BaseModel):
+    id: int
+
+
+# class RequestRHOptional(BaseModel):
+#     user_id: Optional[int] = None
+#     content: Optional[str] = None
+#     registration_date: Optional[_date] = None
+#     visibility: Optional[bool] = None
+#     close: Optional[bool] = None
+#     last_action: Optional[_date] = None
+#     content_history: Optional[List[dict]] = None
 
 
 class Event(BaseModel):
