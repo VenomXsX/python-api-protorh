@@ -11,6 +11,21 @@ export const getToken = (Astro: AstroGlobal) => {
 	return Astro.cookies.get('token')?.json() as Token;
 };
 
+export const getEmail = (Astro: AstroGlobal) => {
+	return Astro.cookies.get('email')?.value || null;
+};
+
+export const hasToken = (Astro: AstroGlobal) => {
+	return Astro.cookies.has('token');
+};
+
+export const useSession = (Astro: AstroGlobal) => {
+	return {
+		isConnected: hasToken(Astro),
+		email: getEmail(Astro),
+	};
+};
+
 export const f = async ({
 	url,
 	token,
@@ -42,8 +57,6 @@ export const f = async ({
 	if (Object.keys(headers).length !== 0) params['headers'] = headers;
 	if (body) params['body'] = body;
 	if (method !== 'GET') params['method'] = method;
-
-	console.log(params);
 
 	const response = await fetch(url, params);
 

@@ -4,9 +4,9 @@ import Render from '../components/Render.astro';
 import Code from '../components/Code.astro';
 import { api_url } from '../lib/api';
 import Button from '../components/Button.astro';
-import { f, getToken } from '../utils/helper';
+import { f, getToken, useSession } from '../utils/helper';
 
-type Queries = 'getall' | 'getbyid';
+type Queries = 'getall' | 'getbyid' | 'createDepartment';
 
 const token = getToken(Astro);
 
@@ -35,6 +35,29 @@ const getOutput = async () => {
 					console.error(error.message);
 				}
 			}
+			break;
+
+		case 'createDepartment':
+			if (Astro.request.method !== 'POST') break;
+			try {
+				const formData = await Astro.request.formData();
+				const name = formData.get('name')?.toString();
+				if (!name) return 'Please provide a name';
+
+				return (
+					await f({
+						url: `${api_url}/departments`,
+						method: 'POST',
+						contentType: 'application/json',
+						body: JSON.stringify({ name }),
+					})
+				).data;
+			} catch (error) {
+				if (error instanceof Error) {
+					console.error(error.message);
+				}
+			}
+			break;
 
 		default:
 			return 'No output';
@@ -42,6 +65,7 @@ const getOutput = async () => {
 };
 
 const output = await getOutput();
+const { isConnected } = useSession(Astro);
 ---
 
 <Render
@@ -57,10 +81,21 @@ const output = await getOutput();
 
 		<Button href="/departments?q=getall">Get All</Button>
 
-		<form action="/departments?q=getbyid" method="post">
-			<Input type="text" name="id" placeholder="IDs" autocomplete="off" />
-			<Button type="submit">Get assigned user to department</Button>
+		<form action="/departments?q=createDepartment" method="post">
+			<Input type="text" name="name" placeholder="Name" autocomplete="off" />
+			<Button type="submit">Create department</Button>
 		</form>
+
+		{
+			isConnected && (
+				<>
+					<form action="/departments?q=getbyid" method="post">
+						<Input type="text" name="id" placeholder="IDs" autocomplete="off" />
+						<Button type="submit">Get assigned user to department</Button>
+					</form>
+				</>
+			)
+		}
 	</div>
 	<Code>{JSON.stringify(output, null, 2)}</Code>
 </Render>

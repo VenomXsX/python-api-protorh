@@ -2,9 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 import Button from '../components/Button.astro';
+import { useSession } from '../utils/helper';
 
-const is_connected = Astro.cookies.has('token');
-const email = Astro.cookies.get('email')?.value || null;
+const { isConnected, email } = useSession(Astro);
 ---
 
 <Layout title="Home">
@@ -53,7 +53,7 @@ const email = Astro.cookies.get('email')?.value || null;
 		}
 		<ul role="list" class="link-card-grid">
 			{
-				!is_connected && (
+				!isConnected && (
 					<Card
 						href="/connect"
 						title="Connect"
@@ -66,27 +66,21 @@ const email = Astro.cookies.get('email')?.value || null;
 				title="Users"
 				body="Learn how Astro works and explore the official API docs."
 			/>
-			{
-				is_connected && (
-					<>
-						<Card
-							href="/departments"
-							title="Departments"
-							body="Supercharge your project with new frameworks and libraries."
-						/>
-						<Card
-							href="https://astro.build/themes/"
-							title="Themes"
-							body="Explore a galaxy of community-built starter themes."
-						/>
-						<Card
-							href="https://astro.build/chat/"
-							title="Community"
-							body="Come say hi to our amazing Discord community. ❤️"
-						/>
-					</>
-				)
-			}
+			<Card
+				href="/departments"
+				title="Departments"
+				body="Supercharge your project with new frameworks and libraries."
+			/>
+			<Card
+				href="https://astro.build/themes/"
+				title="Themes"
+				body="Explore a galaxy of community-built starter themes."
+			/>
+			<Card
+				href="https://astro.build/chat/"
+				title="Community"
+				body="Come say hi to our amazing Discord community. ❤️"
+			/>
 		</ul>
 	</main>
 </Layout>
