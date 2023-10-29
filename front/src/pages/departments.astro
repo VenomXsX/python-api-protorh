@@ -1,0 +1,73 @@
+---
+import Input from '../components/Input.astro';
+import Render from '../components/Render.astro';
+import Code from '../components/Code.astro';
+import { api_url } from '../lib/api';
+import Button from '../components/Button.astro';
+import { f, getToken } from '../utils/helper';
+
+type Queries = 'getall' | 'getbyid';
+
+const token = getToken(Astro);
+
+const q = Astro.url.searchParams.get('q') as Queries;
+
+const getOutput = async () => {
+	switch (q) {
+		case 'getall':
+			return (await f({ url: `${api_url}/departments` })).data;
+
+		case 'getbyid':
+			if (Astro.request.method !== 'POST') break;
+			try {
+				const formData = await Astro.request.formData();
+				const id = formData.get('id')?.toString();
+				if (!id) return 'Please provide an ID';
+
+				return (
+					await f({
+						url: `${api_url}/departments/${id}/users`,
+						token,
+					})
+				).data;
+			} catch (error) {
+				if (error instanceof Error) {
+					console.error(error.message);
+				}
+			}
+
+		default:
+			return 'No output';
+	}
+};
+
+const output = await getOutput();
+---
+
+<Render
+	title="Departments"
+	back={{
+		href: '/',
+		title: 'Go back to home page',
+	}}
+>
+	<h1 class="text-center">Departments</h1>
+	<div class="buttons">
+		<Button href="/departments">Reset</Button>
+
+		<Button href="/departments?q=getall">Get All</Button>
+
+		<form action="/departments?q=getbyid" method="post">
+			<Input type="text" name="id" placeholder="IDs" autocomplete="off" />
+			<Button type="submit">Get assigned user to department</Button>
+		</form>
+	</div>
+	<Code>{JSON.stringify(output, null, 2)}</Code>
+</Render>
+
+<style>
+	.buttons {
+		display: flex;
+		gap: 1rem;
+	}
+</style>

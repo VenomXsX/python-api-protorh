@@ -1,0 +1,26 @@
+---
+import Render from '../components/Render.astro';
+import { checkFile } from '../lib/filesystem';
+import { url } from '../lib/api';
+import { f } from '../utils/helper';
+
+// check if 'openapi.json' exist else download it
+checkFile();
+
+// get docs
+const { data: docs } = await f({
+	url: `${url}/docs`,
+	json: false,
+});
+---
+
+<Render
+	title="Docs"
+	dark={false}
+	back={{
+		href: '/',
+		title: 'Go back to front page',
+	}}
+>
+	<div set:html={docs} />
+</Render>

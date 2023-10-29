@@ -1,0 +1,39 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from './Card.astro';
+
+interface Back {
+	href: string;
+	title: string;
+}
+
+interface Props {
+	title: string;
+	dark?: boolean;
+	back?: Back;
+}
+
+const {
+	title,
+	dark = true,
+	back = {
+		href: '/',
+		title: 'Go back',
+	},
+} = Astro.props;
+const color = dark ? '#fff' : 'inherit';
+---
+
+<Layout title={title} dark={dark}>
+	<main>
+		<Card href={back.href} title={back.title} arrow="left" />
+		<!-- render -->
+		<slot />
+	</main>
+</Layout>
+
+<style define:vars={{ color }}>
+	main {
+		color: var(--color);
+	}
+</style>

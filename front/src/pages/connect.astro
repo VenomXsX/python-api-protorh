@@ -1,0 +1,67 @@
+---
+import Render from '../components/Render.astro';
+import Code from '../components/Code.astro';
+import { api_url } from '../lib/api';
+import Input from '../components/Input.astro';
+import Button from '../components/Button.astro';
+import { f } from '../utils/helper';
+
+const connect = async () => {
+	const formData = await Astro.request.formData();
+	const email = formData.get('email')?.toString();
+	const password = formData.get('password')?.toString();
+
+	if (!email || !password) return 'Please fill email and password';
+
+	const body = { email, password, expire: 60 };
+	const { data, response } = await f({
+		url: `${api_url}/connect`,
+		contentType: 'application/json',
+		method: 'POST',
+		body: JSON.stringify(body),
+	});
+
+	if (response.status === 401) {
+		return response.json();
+	}
+
+	Astro.cookies.set('token', data);
+	Astro.cookies.set('email', email);
+
+	return 'connected';
+};
+
+let data: string | null = 'No output';
+
+if (Astro.request.method === 'POST') {
+	data = await connect();
+	if (data === 'connected') return Astro.redirect('/');
+}
+---
+
+<Render
+	title="Connect"
+	back={{
+		href: '/',
+		title: 'Go back to home page',
+	}}
+>
+	<h1 class="text-center">Connect</h1>
+	<form action="/connect" method="post">
+		<Input label="Email" name="email" placeholder="Email" />
+		<Input label="Password" name="password" placeholder="Password" />
+		<Button>Connect</Button>
+	</form>
+	<Code>{JSON.stringify(data, null, 2)}</Code>
+</Render>
+
+<style>
+	form {
+		display: grid;
+		gap: 1rem;
+	}
+	.buttons {
+		display: flex;
+		gap: 0.5rem;
+	}
+</style>
