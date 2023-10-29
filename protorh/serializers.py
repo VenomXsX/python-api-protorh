@@ -2,8 +2,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from pydantic import BaseModel, validator, ValidationError
 from typing import List, Optional, Union, Any, Dict
 from datetime import date as _date
-from sqlalchemy import CursorResult, RowMapping
-import json
 
 
 Base = declarative_base()
@@ -162,6 +160,11 @@ class RequestRH(BaseModel):
     visibility: bool
     close: bool
     last_action: _date
+    content_history: List[dict]
+
+
+class RequestRHIdAndContentHistory(BaseModel):
+    id: int
     content_history: List[dict]
 
 

@@ -1,12 +1,11 @@
 from database import engine
 import serializers
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import text, CursorResult, RowMapping, exc
+from sqlalchemy import text, CursorResult, RowMapping
 from utils.helper import make_sql, formatDateToString
 from lib.auth import get_current_user
 from typing import Annotated
 from datetime import datetime
-from psycopg2 import errors
 
 
 date_now = formatDateToString(datetime.utcnow())
@@ -136,11 +135,13 @@ def close_rh(item: serializers.RequestRHId, current_user: Annotated[serializers.
         "UPDATE",
         table="request_rh",
         items={
+            "user_id": None,
             "close": True,
             "visibility": False,
             "last_action": date_now
         },
         fields=[
+            "user_id",
             "close",
             "visibility",
             "last_action"
@@ -159,69 +160,46 @@ def close_rh(item: serializers.RequestRHId, current_user: Annotated[serializers.
     }
 
 
-# @router.patch("/{id}")
-# def Update(id, items: serializers.RequestRHOptional):
-#     q, values = make_sql(
-#         "UPDATE",
-#         table="request_rh",
-#         id=id,
-#         items=items,
-#         fields=[
-#             "user_id",
-#             "content",
-#             "registration_date",
-#             "visibility",
-#             "close",
-#             "last_action",
-#             "content_history"
-#         ],
-#         rarray=["content_history"]
-#     )
-#     res: CursorResult = db.execute(text(q), values)
-#     db.commit()
-#     if res.rowcount == 0:
-#         return response(
-#             400,
-#             "Nothing updated, please double check the id",
-#             data=values,
-#             res=res
-#         )
+@router.post("/update")
+def Update(items: serializers.RequestRHInput, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+    q = text("SELECT id, content_history FROM request_rh WHERE user_id = :id")
+    values = {
+        "id": items.user_id
+    }
+    with engine.begin() as conn:
+        res: RowMapping = conn.execute(q, values).mappings().all()
+        if len(res) != 0:
+            rh: serializers.RequestRHIdAndContentHistory = res[0]
+            rh.content_history.append({
+                "author": items.user_id,
+                "content": items.content,
+                "date": date_now
+            })
 
-#     return response(
-#         200,
-#         "Successfully updated, id: " + id,
-#         data=values,
-#         res=res
-#     )
+    q, values = make_sql(
+        "UPDATE",
+        table="request_rh",
+        id=rh["id"],
+        items={
+            "content": items.content,
+            "last_action": date_now,
+            "content_history": rh.content_history
+        },
+        fields=[
+            "content",
+            "last_action",
+            "content_history"
+        ],
+        rarray=["content_history"]
+    )
+    with engine.begin() as conn:
+        res: CursorResult = conn.execute(text(q), values)
+    if res.rowcount == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nothing updated, please double check the id",
+        )
 
-
-# @router.put("/{id}")
-# def UpdateOrCreate(id, items: serializers.RequestRHRequired):
-#     q, values = make_sql(
-#         "UPDATE",
-#         table="request_rh",
-#         items=items,
-#         id=id,
-#         fields=[
-#             "user_id",
-#             "content",
-#             "registration_date",
-#             "visibility",
-#             "close",
-#             "last_action",
-#             "content_history"
-#         ],
-#         rarray=["content_history"]
-#     )
-#     res: CursorResult = db.execute(text(q), values)
-#     db.commit()
-
-#     if res.rowcount == 0:
-#         return Create(items)
-
-#     return response(
-#         200,
-#         "Successfully updated, id: " + id,
-#         data=values,
-#         res=res
-#     )
+    return {
+        "message": "Successfully updated, id: " + str(rh.id),
+    }
