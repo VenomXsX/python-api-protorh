@@ -2,9 +2,19 @@
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 import Button from '../components/Button.astro';
-import { useSession } from '../utils/helper';
+import { f, useSession } from '../utils/helper';
+import { api_url } from '../lib/api';
 
-const { isConnected, email } = useSession(Astro);
+const { isConnected, email, token } = useSession(Astro);
+
+// revalidate token
+if (isConnected) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('token', data);
+}
 ---
 
 <Layout title="Home">

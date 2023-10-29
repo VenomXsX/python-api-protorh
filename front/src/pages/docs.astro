@@ -1,11 +1,21 @@
 ---
 import Render from '../components/Render.astro';
 import { checkFile } from '../lib/filesystem';
-import { url } from '../lib/api';
-import { f } from '../utils/helper';
+import { api_url, url } from '../lib/api';
+import { f, useSession } from '../utils/helper';
 
 // check if 'openapi.json' exist else download it
 checkFile();
+
+const { isConnected, token } = useSession(Astro);
+// revalidate token
+if (isConnected) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('token', data);
+}
 
 // get docs
 const { data: docs } = await f({

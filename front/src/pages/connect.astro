@@ -13,7 +13,7 @@ const connect = async () => {
 
 	if (!email || !password) return 'Please fill email and password';
 
-	const body = { email, password, expire: 60 };
+	const body = { email, password };
 	const { data, response } = await f({
 		url: `${api_url}/connect`,
 		contentType: 'application/json',
@@ -31,11 +31,11 @@ const connect = async () => {
 	return 'connected';
 };
 
-let data: string | null = 'No output';
+let output: string | null = 'No output';
 
 if (Astro.request.method === 'POST') {
-	data = await connect();
-	if (data === 'connected') return Astro.redirect('/');
+	output = await connect();
+	if (output === 'connected') return Astro.redirect('/');
 }
 ---
 
@@ -52,7 +52,7 @@ if (Astro.request.method === 'POST') {
 		<Input label="Password" name="password" placeholder="Password" />
 		<Button>Connect</Button>
 	</form>
-	<Code>{JSON.stringify(data, null, 2)}</Code>
+	<Code>{JSON.stringify(output, null, 2)}</Code>
 </Render>
 
 <style>

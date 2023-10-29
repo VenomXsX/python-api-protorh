@@ -4,11 +4,19 @@ import Render from '../components/Render.astro';
 import Code from '../components/Code.astro';
 import { api_url } from '../lib/api';
 import Button from '../components/Button.astro';
-import { f, getToken, useSession } from '../utils/helper';
+import { f, useSession } from '../utils/helper';
 
 type Queries = 'getall' | 'getbyid' | 'createDepartment';
 
-const token = getToken(Astro);
+const { isConnected, token } = useSession(Astro);
+// revalidate token
+if (isConnected) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('token', data);
+}
 
 const q = Astro.url.searchParams.get('q') as Queries;
 
@@ -65,7 +73,6 @@ const getOutput = async () => {
 };
 
 const output = await getOutput();
-const { isConnected } = useSession(Astro);
 ---
 
 <Render

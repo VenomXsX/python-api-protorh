@@ -23,6 +23,7 @@ export const useSession = (Astro: AstroGlobal) => {
 	return {
 		isConnected: hasToken(Astro),
 		email: getEmail(Astro),
+		token: getToken(Astro),
 	};
 };
 

@@ -1,5 +1,17 @@
 ---
 import Render from '../components/Render.astro';
+import { api_url } from '../lib/api';
+import { f, useSession } from '../utils/helper';
+
+const { isConnected, token } = useSession(Astro);
+// revalidate token
+if (isConnected) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('token', data);
+}
 ---
 
 <Render

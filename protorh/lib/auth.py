@@ -59,8 +59,7 @@ async def get_user(email=None, id=None):
         return user
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    # define error
+async def decode_jwt(token):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -72,7 +71,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
         if email is None:
             raise credentials_exception
-        token_data = serializers.TokenData(email=email)
+
+        return payload
 
     except ExpiredSignatureError:
         raise HTTPException(
@@ -83,9 +83,27 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     except JWTError:
         raise credentials_exception
 
+
+async def check_token(token: Annotated[str, Depends(oauth2_scheme)]):
+    payload = await decode_jwt(token)
+
+    return create_access_token(payload, ACCESS_TOKEN_EXPIRE_MINUTES)
+
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    # define error
+    payload = await decode_jwt(token)
+    email = payload.get("email")
+
+    token_data = serializers.TokenData(email=email)
+
     user = await get_user(token_data.email)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return serializers.UserOut(**user)
 
 
