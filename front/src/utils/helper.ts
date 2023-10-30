@@ -5,8 +5,13 @@ type Token = {
 	token_type: string;
 };
 
+type User = {
+	email: string;
+	role: 'admin' | 'manager' | 'user';
+};
+
 type Session = {
-	email?: string;
+	user: User | null;
 	token?: Token;
 };
 
@@ -14,10 +19,7 @@ type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
 export const useSession = (Astro: AstroGlobal) => {
 	const session: Session = Astro.cookies.get('session')?.json();
-	return {
-		isConnected: Astro.cookies.has('session'),
-		session: session || { token: null, email: null },
-	};
+	return session || { user: null };
 };
 
 export const f = async ({

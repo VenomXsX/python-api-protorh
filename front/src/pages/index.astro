@@ -5,17 +5,14 @@ import Button from '../components/Button.astro';
 import { f, useSession } from '../utils/helper';
 import { api_url, maxAge } from '../lib/api';
 
-const {
-	isConnected,
-	session: { token, email },
-} = useSession(Astro);
+const { token, user } = useSession(Astro);
 // revalidate token
-if (isConnected) {
+if (user !== null) {
 	const { data } = await f({
 		url: `${api_url}/revalidate`,
 		token,
 	});
-	Astro.cookies.set('session', { token: data, email }, { maxAge });
+	Astro.cookies.set('session', { token: data, user }, { maxAge });
 }
 ---
 
@@ -56,16 +53,16 @@ if (isConnected) {
 			>
 		</p>
 		{
-			email != null && (
+			user !== null && (
 				<span>
-					Connected as <span class="color">{email}</span>
+					Connected as <span class="color">{user.email}</span> [{user.role}]
 					<Button href="/disconnect">Disconnect</Button>
 				</span>
 			)
 		}
 		<ul role="list" class="link-card-grid">
 			{
-				!isConnected && (
+				user === null && (
 					<Card
 						href="/connect"
 						title="Connect"

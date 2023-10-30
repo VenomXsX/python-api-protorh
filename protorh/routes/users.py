@@ -26,7 +26,7 @@ async def get_all():
     return result
 
 
-# Endpoint : /api/user/{id_user}
+# Endpoint : /api/user/me
 # Type : GET
 # JWT required : True
 # get me
@@ -114,18 +114,20 @@ async def create(items: serializers.CreateUser):
     return values
 
 
-# Endpoint : /api/user/delete
+# Endpoint : /api/user/delete/{user_id}
 # Type : DELETE
 # JWT required : False
 # delete user by id
 @router.delete("/delete/{id}", response_model=str)
 async def delete(id: int):
-    q = text("DELETE FROM users WHERE id=:id")
-    values = {
-        "id": id
-    }
+    q, values = make_sql(
+        "DELETE",
+        table="users",
+        id=id
+    )
+
     with engine.begin() as conn:
-        result: CursorResult = conn.execute(q, values)
+        result: CursorResult = conn.execute(text(q), values)
         if result.rowcount == 0:
             return "Something went wrong and 0 rows affected"
     return f"User id {id} removed from Users"
@@ -143,9 +145,7 @@ async def update(id, items: serializers.UpdateUser, current_user: Annotated[seri
         "birthday_date",
         "address",
         "postal_code",
-        "age",
         "meta",
-        "registration_date",
     ]
     adminFields = [
         "firstname", "lastname", "role"
@@ -182,11 +182,17 @@ async def update(id, items: serializers.UpdateUser, current_user: Annotated[seri
     with engine.begin() as conn:
         result: CursorResult = conn.execute(text(q), values)
     if result.rowcount == 0:
-        return response(400, "Nothing updated, please double check the id", data=values, res=result)
-    return response(200, "Successfully updated, id: " + id, data=values, res=result)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nothing updated, please double check the id"
+        )
+    return {
+        "message": "Successfully updated, id: " + id,
+        "data": values
+    }
 
 
-# Endpoint : /api/password
+# Endpoint : /api/user/password
 # Type : PATCH
 # JWT required : False
 # update password for specific user

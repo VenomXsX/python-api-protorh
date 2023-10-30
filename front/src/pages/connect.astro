@@ -25,7 +25,12 @@ const connect = async () => {
 		return response.json();
 	}
 
-	Astro.cookies.set('session', { token: data, email }, { maxAge });
+	const { data: user } = await f({
+		url: `${api_url}/user/me`,
+		token: data,
+	});
+
+	Astro.cookies.set('session', { token: data, user }, { maxAge });
 
 	return 'connected';
 };

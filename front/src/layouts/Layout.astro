@@ -39,6 +39,10 @@ const background = dark ? '#13151a' : '#fff';
 		background: var(--background);
 		background-size: 224px;
 	}
+	body {
+		padding: 0;
+		margin: 1rem;
+	}
 	code {
 		font-family:
 			Menlo,
@@ -52,5 +56,30 @@ const background = dark ? '#13151a' : '#fff';
 	}
 	.text-center {
 		text-align: center;
+	}
+	.buttons {
+		display: flex;
+		align-items: start;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+	.fields {
+		display: grid;
+		background-color: rgba(255, 255, 255, 0.048);
+		padding: 1rem;
+		border-radius: 7px;
+	}
+	.fields > label {
+		font-size: 1.5rem;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		margin-bottom: 1rem;
+		cursor: text;
+	}
+	.fields > div {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: start;
 	}
 </style>

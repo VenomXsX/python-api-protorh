@@ -6,26 +6,38 @@ import { api_url, maxAge } from '../lib/api';
 import Button from '../components/Button.astro';
 import { f, useSession } from '../utils/helper';
 
+const { token, user } = useSession(Astro);
+// revalidate token
+if (user !== null) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('session', { token: data, user }, { maxAge });
+}
+
 type Queries =
 	| 'getall'
 	| 'getbyid'
 	| 'createDepartment'
 	| 'manageUserDepartment';
 
-const {
-	isConnected,
-	session: { token, email },
-} = useSession(Astro);
-// revalidate token
-if (isConnected) {
-	const { data } = await f({
-		url: `${api_url}/revalidate`,
-		token,
-	});
-	Astro.cookies.set('session', { token: data, email }, { maxAge });
-}
-
 const q = Astro.url.searchParams.get('q') as Queries;
+
+const tc = async (callback: (formData: FormData) => unknown) => {
+	if (Astro.request.method !== 'POST') return;
+
+	try {
+		const formData = await Astro.request.formData();
+
+		return callback(formData);
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error(error.message);
+			return error.message;
+		}
+	}
+};
 
 const getOutput = async () => {
 	switch (q) {
@@ -33,9 +45,7 @@ const getOutput = async () => {
 			return (await f({ url: `${api_url}/departments` })).data;
 
 		case 'getbyid':
-			if (Astro.request.method !== 'POST') break;
-			try {
-				const formData = await Astro.request.formData();
+			return await tc(async (formData) => {
 				const id = formData.get('id')?.toString();
 				if (!id) return 'Please provide an ID';
 				if (isNaN(Number(id))) return 'Please provide a valid number ID';
@@ -46,17 +56,10 @@ const getOutput = async () => {
 						token,
 					})
 				).data;
-			} catch (error) {
-				if (error instanceof Error) {
-					console.error(error.message);
-				}
-			}
-			break;
+			});
 
 		case 'createDepartment':
-			if (Astro.request.method !== 'POST') break;
-			try {
-				const formData = await Astro.request.formData();
+			return await tc(async (formData) => {
 				const name = formData.get('name')?.toString();
 				if (!name) return 'Please provide a name';
 
@@ -68,18 +71,10 @@ const getOutput = async () => {
 						body: JSON.stringify({ name }),
 					})
 				).data;
-			} catch (error) {
-				if (error instanceof Error) {
-					console.error(error.message);
-				}
-			}
-			break;
+			});
 
 		case 'manageUserDepartment':
-			if (Astro.request.method !== 'POST') break;
-
-			try {
-				const formData = await Astro.request.formData();
+			return await tc(async (formData) => {
 				const id = formData.get('id')?.toString();
 				const userIds = formData.get('user_ids')?.toString();
 				const method =
@@ -93,6 +88,7 @@ const getOutput = async () => {
 
 				const userIdArray = userIds.split(',');
 
+				// check if ID is number
 				for (const id of userIdArray) {
 					if (isNaN(Number(id))) return 'Please provide a valid number ID';
 				}
@@ -106,11 +102,7 @@ const getOutput = async () => {
 						token,
 					})
 				).data;
-			} catch (error) {
-				if (error instanceof Error) {
-					console.error(error.message);
-				}
-			}
+			});
 
 		default:
 			return 'No output';
@@ -128,58 +120,65 @@ const output = await getOutput();
 	}}
 >
 	<h1 class="text-center">Departments</h1>
+	<Button href="/departments">Reset</Button>
+	<Code>{JSON.stringify(output, null, 2)}</Code>
 	<div class="buttons">
-		<Button href="/departments">Reset</Button>
-
 		<Button href="/departments?q=getall">Get All</Button>
 
 		<form action="/departments?q=createDepartment" method="post">
-			<Input type="text" name="name" placeholder="Name" autocomplete="off" />
+			<Input type="text" name="name" placeholder="Name" />
 			<Button type="submit">Create department</Button>
 		</form>
 
 		{
-			isConnected && (
+			user !== null && (
 				<>
 					<form action="/departments?q=getbyid" method="post">
 						<Input type="text" name="id" placeholder="ID" />
 						<Button type="submit">Get assigned user to department</Button>
 					</form>
 
-					<form action="/departments?q=manageUserDepartment" method="post">
-						<Input type="text" name="id" placeholder="Departtment id" />
-						<Input
-							type="text"
-							name="user_ids"
-							placeholder="User's ids (separate with comma ',')"
-						/>
-						<Button type="submit" name="add">
-							Add user to department
-						</Button>
+					<form
+						class="fields"
+						action="/departments?q=manageUserDepartment"
+						method="post"
+					>
+						<label>Add user to department</label>
+						<div>
+							<Input type="text" name="id" placeholder="Departtment id*" />
+							<Input
+								type="text"
+								name="user_ids"
+								label="User's ids*"
+								placeholder="separate with comma ','"
+							/>
+							<Button type="submit" name="add">
+								Submit
+							</Button>
+						</div>
 					</form>
 
-					<form action="/departments?q=manageUserDepartment" method="post">
-						<Input type="text" name="id" placeholder="Departtment id" />
-						<Input
-							type="text"
-							name="user_ids"
-							placeholder="User's ids (separate with comma ',')"
-						/>
-						<Button type="submit" name="remove">
-							Remove user from department
-						</Button>
+					<form
+						class="fields"
+						action="/departments?q=manageUserDepartment"
+						method="post"
+					>
+						<label>Remove user from department</label>
+						<div>
+							<Input type="text" name="id" placeholder="Departtment id" />
+							<Input
+								type="text"
+								name="user_ids"
+								label="User's ids*"
+								placeholder="separate with comma ','"
+							/>
+							<Button type="submit" name="remove">
+								Submit
+							</Button>
+						</div>
 					</form>
 				</>
 			)
 		}
 	</div>
-	<Code>{JSON.stringify(output, null, 2)}</Code>
 </Render>
-
-<style>
-	.buttons {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
-</style>
