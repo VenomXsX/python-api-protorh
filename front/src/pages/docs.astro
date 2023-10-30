@@ -1,7 +1,7 @@
 ---
 import Render from '../components/Render.astro';
 import { checkFile } from '../lib/filesystem';
-import { api_url, url } from '../lib/api';
+import { api_url, url, maxAge } from '../lib/api';
 import { f, useSession } from '../utils/helper';
 
 // check if 'openapi.json' exist else download it
@@ -14,7 +14,7 @@ if (isConnected) {
 		url: `${api_url}/revalidate`,
 		token,
 	});
-	Astro.cookies.set('token', data);
+	Astro.cookies.set('token', data, { maxAge });
 }
 
 // get docs

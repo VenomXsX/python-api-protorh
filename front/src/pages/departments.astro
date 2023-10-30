@@ -2,11 +2,15 @@
 import Input from '../components/Input.astro';
 import Render from '../components/Render.astro';
 import Code from '../components/Code.astro';
-import { api_url } from '../lib/api';
+import { api_url, maxAge } from '../lib/api';
 import Button from '../components/Button.astro';
 import { f, useSession } from '../utils/helper';
 
-type Queries = 'getall' | 'getbyid' | 'createDepartment';
+type Queries =
+	| 'getall'
+	| 'getbyid'
+	| 'createDepartment'
+	| 'manageUserDepartment';
 
 const { isConnected, token } = useSession(Astro);
 // revalidate token
@@ -15,7 +19,7 @@ if (isConnected) {
 		url: `${api_url}/revalidate`,
 		token,
 	});
-	Astro.cookies.set('token', data);
+	Astro.cookies.set('token', data, { maxAge });
 }
 
 const q = Astro.url.searchParams.get('q') as Queries;
@@ -31,6 +35,7 @@ const getOutput = async () => {
 				const formData = await Astro.request.formData();
 				const id = formData.get('id')?.toString();
 				if (!id) return 'Please provide an ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
 
 				return (
 					await f({
@@ -67,6 +72,43 @@ const getOutput = async () => {
 			}
 			break;
 
+		case 'manageUserDepartment':
+			if (Astro.request.method !== 'POST') break;
+
+			try {
+				const formData = await Astro.request.formData();
+				const id = formData.get('id')?.toString();
+				const userIds = formData.get('user_ids')?.toString();
+				const method =
+					(formData.has('add') && 'add') ||
+					(formData.has('remove') && 'remove');
+
+				// check empty
+				if (!id || !userIds) return 'Please fill all the fields';
+				// check if ID is number
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+				const userIdArray = userIds.split(',');
+
+				for (const id of userIdArray) {
+					if (isNaN(Number(id))) return 'Please provide a valid number ID';
+				}
+
+				return (
+					await f({
+						url: `${api_url}/departments/${id}/users/${method}`,
+						method: 'POST',
+						contentType: 'application/json',
+						body: JSON.stringify(userIdArray),
+						token,
+					})
+				).data;
+			} catch (error) {
+				if (error instanceof Error) {
+					console.error(error.message);
+				}
+			}
+
 		default:
 			return 'No output';
 	}
@@ -97,8 +139,32 @@ const output = await getOutput();
 			isConnected && (
 				<>
 					<form action="/departments?q=getbyid" method="post">
-						<Input type="text" name="id" placeholder="IDs" autocomplete="off" />
+						<Input type="text" name="id" placeholder="ID" />
 						<Button type="submit">Get assigned user to department</Button>
+					</form>
+
+					<form action="/departments?q=manageUserDepartment" method="post">
+						<Input type="text" name="id" placeholder="Departtment id" />
+						<Input
+							type="text"
+							name="user_ids"
+							placeholder="User's ids (separate with comma ',')"
+						/>
+						<Button type="submit" name="add">
+							Add user to department
+						</Button>
+					</form>
+
+					<form action="/departments?q=manageUserDepartment" method="post">
+						<Input type="text" name="id" placeholder="Departtment id" />
+						<Input
+							type="text"
+							name="user_ids"
+							placeholder="User's ids (separate with comma ',')"
+						/>
+						<Button type="submit" name="remove">
+							Remove user from department
+						</Button>
 					</form>
 				</>
 			)
@@ -110,6 +176,7 @@ const output = await getOutput();
 <style>
 	.buttons {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 1rem;
 	}
 </style>

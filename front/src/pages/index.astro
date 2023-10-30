@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 import Button from '../components/Button.astro';
 import { f, useSession } from '../utils/helper';
-import { api_url } from '../lib/api';
+import { api_url, maxAge } from '../lib/api';
 
 const { isConnected, email, token } = useSession(Astro);
 
@@ -13,7 +13,7 @@ if (isConnected) {
 		url: `${api_url}/revalidate`,
 		token,
 	});
-	Astro.cookies.set('token', data);
+	Astro.cookies.set('token', data, { maxAge });
 }
 ---
 

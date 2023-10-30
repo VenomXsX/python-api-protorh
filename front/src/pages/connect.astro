@@ -1,7 +1,7 @@
 ---
 import Render from '../components/Render.astro';
 import Code from '../components/Code.astro';
-import { api_url } from '../lib/api';
+import { api_url, maxAge } from '../lib/api';
 import Input from '../components/Input.astro';
 import Button from '../components/Button.astro';
 import { f } from '../utils/helper';
@@ -25,8 +25,8 @@ const connect = async () => {
 		return response.json();
 	}
 
-	Astro.cookies.set('token', data);
-	Astro.cookies.set('email', email);
+	Astro.cookies.set('token', data, { maxAge });
+	Astro.cookies.set('email', email, { maxAge });
 
 	return 'connected';
 };
