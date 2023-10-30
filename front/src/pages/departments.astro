@@ -120,9 +120,9 @@ const output = await getOutput();
 	}}
 >
 	<h1 class="text-center">Departments</h1>
+	<Button href="/departments">Reset</Button>
+	<Code>{JSON.stringify(output, null, 2)}</Code>
 	<div class="buttons">
-		<Button href="/departments">Reset</Button>
-
 		<Button href="/departments?q=getall">Get All</Button>
 
 		<form action="/departments?q=createDepartment" method="post">
@@ -181,5 +181,4 @@ const output = await getOutput();
 			)
 		}
 	</div>
-	<Code>{JSON.stringify(output, null, 2)}</Code>
 </Render>
