@@ -1,0 +1,39 @@
+---
+import Render from '../components/Render.astro';
+import { checkFile } from '../lib/filesystem';
+import { api_url, url, maxAge } from '../lib/api';
+import { f, useSession } from '../utils/helper';
+
+// check if 'openapi.json' exist else download it
+checkFile();
+
+const {
+	isConnected,
+	session: { token, email },
+} = useSession(Astro);
+// revalidate token
+if (isConnected) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('session', { token: data, email }, { maxAge });
+}
+
+// get docs
+const { data: docs } = await f({
+	url: `${url}/docs`,
+	json: false,
+});
+---
+
+<Render
+	title="Docs"
+	dark={false}
+	back={{
+		href: '/',
+		title: 'Go back to front page',
+	}}
+>
+	<div set:html={docs} />
+</Render>

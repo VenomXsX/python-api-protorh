@@ -1,18 +1,26 @@
 import serializers
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, CursorResult
 from database import engine
 from utils.helper import make_sql, calc_age, formatStringToDate
-from lib.auth import verify_password, get_user, create_access_token
+from lib.auth import verify_password, get_user, create_access_token, check_token
+from typing import Annotated
 
 
 router = APIRouter(
-    prefix='/connect',
     tags=['connect']
 )
 
 
-@router.post("/")
+@router.get("/revalidate")
+async def revalidate(new_token: Annotated[str, Depends(check_token)]):
+    return {
+        "access_token": new_token,
+        "token_type": "bearer"
+    }
+
+
+@router.post("/connect")
 async def connect(form_data: serializers.FormData):
     INVALID_EMAIL_OR_PASS = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

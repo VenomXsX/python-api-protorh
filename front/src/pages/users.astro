@@ -1,0 +1,28 @@
+---
+import Render from '../components/Render.astro';
+import { api_url, maxAge } from '../lib/api';
+import { f, useSession } from '../utils/helper';
+
+const {
+	isConnected,
+	session: { token, email },
+} = useSession(Astro);
+// revalidate token
+if (isConnected) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('session', { token: data, email }, { maxAge });
+}
+---
+
+<Render
+	title="Users"
+	back={{
+		href: '/',
+		title: 'Go back to home page',
+	}}
+>
+	<h1 class="text-center">Users</h1>
+</Render>

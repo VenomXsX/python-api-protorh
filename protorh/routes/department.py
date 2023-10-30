@@ -51,7 +51,8 @@ async def get_all(items: serializers.DepartmentRequired):
                 detail="Something went wrong, please retry"
             )
 
-    return values
+    return {
+        "message": "Successfully added: " + items.name}
 
 
 # Endpoint : /api/departments/{department_id}/users
