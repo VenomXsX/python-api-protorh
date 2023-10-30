@@ -49,7 +49,7 @@ class UserAdminView(BaseModel):
     registration_date: _date
     token: str
     role: str
-    department_id: int
+    department_id: Union[int, None]
 
 
 class UserView(BaseModel):
@@ -60,7 +60,7 @@ class UserView(BaseModel):
     age: int
     registration_date: _date
     role: str
-    department_id: int
+    department_id: Union[int, None]
 
 
 class User(BaseModel):
