@@ -1,5 +1,9 @@
 {
   "name": "front",
+  "description": "A front-end app for ProtoRH",
+  "main": "index.js",
+  "author": "zhu",
+  "license": "MIT",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -11,7 +15,9 @@
   },
   "dependencies": {
     "@astrojs/node": "^6.0.3",
-    "@types/node": "^20.8.9",
     "astro": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.9"
   }
 }
