@@ -7,14 +7,17 @@ import { f, useSession } from '../utils/helper';
 // check if 'openapi.json' exist else download it
 checkFile();
 
-const { isConnected, token } = useSession(Astro);
+const {
+	isConnected,
+	session: { token, email },
+} = useSession(Astro);
 // revalidate token
 if (isConnected) {
 	const { data } = await f({
 		url: `${api_url}/revalidate`,
 		token,
 	});
-	Astro.cookies.set('token', data, { maxAge });
+	Astro.cookies.set('session', { token: data, email }, { maxAge });
 }
 
 // get docs

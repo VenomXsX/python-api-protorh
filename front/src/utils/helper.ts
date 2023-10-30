@@ -5,25 +5,18 @@ type Token = {
 	token_type: string;
 };
 
+type Session = {
+	email?: string;
+	token?: Token;
+};
+
 type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
-export const getToken = (Astro: AstroGlobal) => {
-	return Astro.cookies.get('token')?.json() as Token;
-};
-
-export const getEmail = (Astro: AstroGlobal) => {
-	return Astro.cookies.get('email')?.value || null;
-};
-
-export const hasToken = (Astro: AstroGlobal) => {
-	return Astro.cookies.has('token');
-};
-
 export const useSession = (Astro: AstroGlobal) => {
+	const session: Session = Astro.cookies.get('session')?.json();
 	return {
-		isConnected: hasToken(Astro),
-		email: getEmail(Astro),
-		token: getToken(Astro),
+		isConnected: Astro.cookies.has('session'),
+		session: session || { token: null, email: null },
 	};
 };
 

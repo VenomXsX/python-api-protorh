@@ -5,15 +5,17 @@ import Button from '../components/Button.astro';
 import { f, useSession } from '../utils/helper';
 import { api_url, maxAge } from '../lib/api';
 
-const { isConnected, email, token } = useSession(Astro);
-
+const {
+	isConnected,
+	session: { token, email },
+} = useSession(Astro);
 // revalidate token
 if (isConnected) {
 	const { data } = await f({
 		url: `${api_url}/revalidate`,
 		token,
 	});
-	Astro.cookies.set('token', data, { maxAge });
+	Astro.cookies.set('session', { token: data, email }, { maxAge });
 }
 ---
 
