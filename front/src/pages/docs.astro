@@ -20,7 +20,7 @@ if (user !== null) {
 // get docs
 const { data: docs } = await f({
 	url: `${url}/docs`,
-	json: false,
+	dataFormat: 'text',
 });
 ---
 

@@ -22,20 +22,28 @@ export const useSession = (Astro: AstroGlobal) => {
 	return session || { user: null };
 };
 
+type DataFormat = 'json' | 'text' | 'blob';
+
+const getResponse = async (response: Response, dataFormat: DataFormat) => {
+	if (dataFormat === 'json') return response.json();
+	if (dataFormat === 'text') return response.json();
+	if (dataFormat === 'blob') return response.blob();
+};
+
 export const f = async ({
 	url,
 	token,
 	method = 'GET',
 	contentType,
 	body,
-	json = true,
+	dataFormat = 'json',
 }: {
 	url: string;
 	token?: Token;
 	method?: Method;
-	contentType?: 'application/json';
-	body?: string;
-	json?: boolean;
+	contentType?: 'application/json' | 'multipart/form-data; boundary=---011000010111000001101001';
+	body?: string | FromData;
+	dataFormat?: DataFormat;
 }) => {
 	const headers: {
 		Authorization?: string;
@@ -56,7 +64,7 @@ export const f = async ({
 
 	const response = await fetch(url, params);
 
-	const data = json ? await response.json() : await response.text();
+	const data = await getResponse(response, dataFormat);
 
 	return { data, response };
 };
