@@ -42,7 +42,7 @@ export const f = async ({
 	token?: Token;
 	method?: Method;
 	contentType?: 'application/json' | 'multipart/form-data; boundary=---011000010111000001101001';
-	body?: string | FromData;
+	body?: string | FormData;
 	dataFormat?: DataFormat;
 }) => {
 	const headers: {
@@ -56,7 +56,7 @@ export const f = async ({
 	const params: {
 		method?: Method;
 		headers?: typeof headers;
-		body?: string;
+		body?: string | FormData;
 	} = {};
 	if (Object.keys(headers).length !== 0) params['headers'] = headers;
 	if (body) params['body'] = body;
