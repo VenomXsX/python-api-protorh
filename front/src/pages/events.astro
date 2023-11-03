@@ -1,0 +1,216 @@
+---
+import Input from '../components/Input.astro';
+import Render from '../components/Render.astro';
+import Code from '../components/Code.astro';
+import { api_url, maxAge } from '../lib/api';
+import Button from '../components/Button.astro';
+import { f, tc, useSession } from '../utils/helper';
+
+const { token, user } = useSession(Astro);
+// revalidate token
+if (user !== null) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('session', { token: data, user }, { maxAge });
+} else return Astro.redirect('/?noperm');
+
+type Queries =
+	| 'getall'
+	| 'getbyid'
+	| 'create'
+	| 'delete'
+	| 'updatePatch'
+	| 'updatePut';
+
+const q = Astro.url.searchParams.get('q') as Queries;
+
+const getOutput = async () => {
+	switch (q) {
+		case 'getall':
+			return (await f({ url: `${api_url}/events` })).data;
+
+		case 'getbyid':
+			return await tc(Astro, async (formData) => {
+				const id = formData.get('id')?.toString();
+				if (!id) return 'Please provide an ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+				return (await f({ url: `${api_url}/events/${id}` })).data;
+			});
+
+		case 'create':
+			return await tc(Astro, async (formData) => {
+				const name = formData.get('name');
+				const date = formData.get('date');
+				const description = formData.get('description');
+				const user_id = formData.get('user_id');
+				const department_id = formData.get('department_id');
+
+				const body = { name, department_id, date, description, user_id };
+
+				// checks
+				for (const item of Object.values(body)) {
+					if (!item && item === '') return 'Please fill all the fields';
+				}
+
+				return await f({
+					url: `${api_url}/events/create`,
+					method: 'POST',
+					contentType: 'application/json',
+					body: JSON.stringify(body),
+				});
+			});
+
+		case 'delete':
+			return await tc(Astro, async (formData) => {
+				const id = formData.get('id')?.toString();
+				if (!id) return 'Please provide an ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+				return (
+					await f({
+						url: `${api_url}/events/${id}`,
+						method: 'DELETE',
+					})
+				).data;
+			});
+
+		case 'updatePatch':
+			return await tc(Astro, async (formData) => {
+				const id = formData.get('id');
+				const name = formData.get('name');
+				const date = formData.get('date');
+				const description = formData.get('description');
+				const user_id = formData.get('user_id');
+				const department_id = formData.get('department_id');
+
+				if (!id) return 'Please provide an ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+				const obj: any = { name, date, description, user_id, department_id };
+
+				// filter: remove all empty
+				const body = Object.keys(obj).reduce((acc: any, key) => {
+					if (obj[key] && obj[key] !== '') return { ...acc, [key]: obj[key] };
+					return acc;
+				}, {});
+
+				return (
+					await f({
+						url: `${api_url}/events/${id}`,
+						method: 'PATCH',
+						contentType: 'application/json',
+						body: JSON.stringify(body),
+					})
+				).data;
+			});
+
+		case 'updatePut':
+			return await tc(Astro, async (formData) => {
+				const id = formData.get('id');
+				const name = formData.get('name');
+				const date = formData.get('date');
+				const description = formData.get('description');
+				const user_id = formData.get('user_id');
+				const department_id = formData.get('department_id');
+
+				if (!id) return 'Please provide an ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+				const body = { name, date, description, user_id, department_id };
+
+				// checks
+				for (const item of Object.values(body)) {
+					if (!item && item === '') return 'Please fill all the fields';
+				}
+
+				return (
+					await f({
+						url: `${api_url}/events/${id}`,
+						method: 'PUT',
+						contentType: 'application/json',
+						body: JSON.stringify(body),
+					})
+				).data;
+			});
+
+		default:
+			return 'No output';
+	}
+};
+
+const output = await getOutput();
+---
+
+<Render
+	title="Events"
+	back={{
+		href: '/',
+		title: 'Go back to home page',
+	}}
+>
+	<h1 class="text-center">Events</h1>
+	<Button href="/events">Reset</Button>
+	<Code>{JSON.stringify(output, null, 2)}</Code>
+	<div class="buttons">
+		<Button href="/events?q=getall">Get All</Button>
+
+		<!-- <form action="/events?q=createDepartment" method="post">
+			<Input type="text" name="name" placeholder="Name" />
+			<Button type="submit">Create department</Button>
+		</form> -->
+
+		<form action="/events?q=getbyid" method="post">
+			<Input type="text" name="id" placeholder="ID" />
+			<Button type="submit">Get by id</Button>
+		</form>
+
+		<form class="fields" action="/events?q=create" method="post">
+			<label>Create an event</label>
+			<div>
+				<Input type="text" name="name" placeholder="Name*" />
+				<Input type="date" name="date" label="Date*" />
+				<Input type="text" name="description" placeholder="Description*" />
+				<Input type="text" name="user_id" placeholder="User_id*" />
+				<Input type="text" name="department_id" placeholder="Department_id*" />
+				<Button type="submit">Submit</Button>
+			</div>
+		</form>
+
+		<form class="fields" action="/events?q=delete" method="post">
+			<label>Delete an events</label>
+			<div>
+				<Input type="text" name="id" placeholder="id*" />
+				<Button type="submit">Submit</Button>
+			</div>
+		</form>
+
+		<form class="fields" action="/events?q=updatePatch" method="post">
+			<label>Update an event</label>
+			<div>
+				<Input type="text" name="id" placeholder="Event ID*" />
+				<Input type="text" name="name" placeholder="Name" />
+				<Input type="date" name="date" label="Date" />
+				<Input type="text" name="description" placeholder="Description" />
+				<Input type="text" name="user_id" placeholder="User_id" />
+				<Input type="text" name="department_id" placeholder="Department_id" />
+				<Button type="submit">Submit</Button>
+			</div>
+		</form>
+
+		<form class="fields" action="/events?q=updatePut" method="post">
+			<label>Update or create an event</label>
+			<div>
+				<Input type="text" name="id" placeholder="Event ID*" />
+				<Input type="text" name="name" placeholder="Name*" />
+				<Input type="date" name="date" label="Date*" />
+				<Input type="text" name="description" placeholder="Description*" />
+				<Input type="text" name="user_id" placeholder="User_id*" />
+				<Input type="text" name="department_id" placeholder="Department_id*" />
+				<Button type="submit">Submit</Button>
+			</div>
+		</form>
+	</div>
+</Render>
