@@ -1,0 +1,143 @@
+---
+import Input from '../components/Input.astro';
+import Render from '../components/Render.astro';
+import Code from '../components/Code.astro';
+import { api_url, maxAge } from '../lib/api';
+import Button from '../components/Button.astro';
+import { f, tc, useSession } from '../utils/helper';
+
+const { token, user } = useSession(Astro);
+// revalidate token
+if (user !== null) {
+	const { data } = await f({
+		url: `${api_url}/revalidate`,
+		token,
+	});
+	Astro.cookies.set('session', { token: data, user }, { maxAge });
+} else return Astro.redirect('/?noperm');
+
+type Queries = 'getall' | 'getbyid' | 'manageRH';
+
+const q = Astro.url.searchParams.get('q') as Queries;
+
+const getMode = (formData: FormData) => {
+	if (formData.has('add')) return 'add';
+	if (formData.has('update')) return 'update';
+	if (formData.has('remove')) return 'remove';
+};
+
+const getOutput = async () => {
+	switch (q) {
+		case 'getall':
+			return (await f({ url: `${api_url}/rh/msg`, token })).data;
+
+		case 'getbyid':
+			return await tc(Astro, async (formData) => {
+				const id = formData.get('id')?.toString();
+				if (!id) return 'Please provide an ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+				return (
+					await f({
+						url: `${api_url}/rh/msg/${id}`,
+						token,
+					})
+				).data;
+			});
+
+		case 'manageRH':
+			return await tc(Astro, async (formData) => {
+				const id = formData.get('id')?.toString();
+				const content = formData.get('content')?.toString();
+
+				// check id is 'add' 'update' 'remove'
+				const mode = getMode(formData);
+
+				// checks
+				if (!mode) return 'No mode';
+				if (!id) return 'Please provide an user ID';
+				if (isNaN(Number(id))) return 'Please provide a valid number user ID';
+				if (mode !== 'remove' && !content) return 'Please provide a content';
+
+				const body: {
+					id?: string;
+					user_id?: string;
+					content?: string;
+				} = {};
+
+				if (mode === 'add' || mode === 'update') {
+					body.user_id = id;
+					body.content = content;
+				} else {
+					body.id = id;
+				}
+
+				return (
+					await f({
+						url: `${api_url}/rh/msg/${mode}`,
+						method: 'POST',
+						contentType: 'application/json',
+						body: JSON.stringify(body),
+						token,
+					})
+				).data;
+			});
+
+		default:
+			return 'No output';
+	}
+};
+
+const output = await getOutput();
+---
+
+<Render
+	title="Request RH"
+	back={{
+		href: '/',
+		title: 'Go back to home page',
+	}}
+>
+	<h1 class="text-center">Request RH</h1>
+	<Button href="/request-rh">Reset</Button>
+	<Code>{JSON.stringify(output, null, 2)}</Code>
+	<div class="buttons">
+		<Button href="/request-rh?q=getall">Get All</Button>
+
+		<!-- <form action="/request-rh?q=createDepartment" method="post">
+			<Input type="text" name="name" placeholder="Name" />
+			<Button type="submit">Create department</Button>
+		</form> -->
+
+		<form action="/request-rh?q=getbyid" method="post">
+			<Input type="text" name="id" placeholder="ID" />
+			<Button type="submit">Get by id</Button>
+		</form>
+
+		<form class="fields" action="/request-rh?q=manageRH" method="post">
+			<label>Create a RH message</label>
+			<div>
+				<Input type="text" name="id" placeholder="User ID*" />
+				<Input type="text" name="content" placeholder="Content*" />
+				<Button type="submit" name="add">Submit</Button>
+			</div>
+		</form>
+
+		<form class="fields" action="/request-rh?q=manageRH" method="post">
+			<label>Remove a RH message</label>
+			<div>
+				<Input type="text" name="id" placeholder="id*" />
+				<Button type="submit" name="remove">Submit</Button>
+			</div>
+		</form>
+
+		<form class="fields" action="/request-rh?q=manageRH" method="post">
+			<label>Update a RH message</label>
+			<div>
+				<Input type="text" name="id" placeholder="User ID*" />
+				<Input type="text" name="content" placeholder="Content*" />
+				<Button type="submit" name="update">Submit</Button>
+			</div>
+		</form>
+	</div>
+</Render>

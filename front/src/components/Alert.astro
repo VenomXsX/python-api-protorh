@@ -1,0 +1,36 @@
+---
+type Color = 'red' | 'green';
+
+type Props = {
+	content?: string;
+	color?: Color;
+};
+
+const { content = 'Alert message', color } = Astro.props;
+
+const getColor = (color?: Color) => {
+	switch (color) {
+		case 'red':
+			return '#d40000';
+
+		default:
+			return '#23262d';
+	}
+};
+
+const cssColor = getColor(color);
+---
+
+<div>{content}</div>
+
+<style define:vars={{ cssColor }}>
+	div {
+		background-color: var(--cssColor);
+		padding: 1.5rem;
+		color: #fff;
+		font-weight: bold;
+		font-size: larger;
+		border-radius: 0.5rem;
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+	}
+</style>
