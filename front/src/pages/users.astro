@@ -5,7 +5,7 @@ import Input from '../components/Input.astro';
 import Select from '../components/Select.astro';
 import Render from '../components/Render.astro';
 import { api_url, maxAge } from '../lib/api';
-import { f, useSession } from '../utils/helper';
+import { f, tc, useSession } from '../utils/helper';
 
 const { token, user } = useSession(Astro);
 // revalidate token
@@ -32,21 +32,6 @@ const q = Astro.url.searchParams.get('q') as Queries;
 let imageSrc = '';
 
 const disabledMessage = 'Disabled, not working';
-
-const tc = async (callback: (formData: FormData) => unknown) => {
-	if (Astro.request.method !== 'POST') return;
-
-	try {
-		const formData = await Astro.request.formData();
-
-		return callback(formData);
-	} catch (error) {
-		if (error instanceof Error) {
-			console.error(error.message);
-			return error.message;
-		}
-	}
-};
 
 const getOutput = async () => {
 	switch (q) {
@@ -123,7 +108,7 @@ const getOutput = async () => {
 		// });
 
 		case 'getbyid':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const id = formData.get('id')?.toString();
 				if (!id) return 'Please provide an ID';
 				if (isNaN(Number(id))) return 'Please provide a valid number ID';
@@ -137,7 +122,7 @@ const getOutput = async () => {
 			});
 
 		case 'delete':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const id = formData.get('id')?.toString();
 				if (!id) return 'Please provide an ID';
 				if (isNaN(Number(id))) return 'Please provide a valid number ID';
@@ -151,7 +136,7 @@ const getOutput = async () => {
 			});
 
 		case 'create':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const email = formData.get('email')?.toString();
 				const password = formData.get('password')?.toString();
 				const confirm_pass = formData.get('confirm_pass')?.toString();
@@ -190,7 +175,7 @@ const getOutput = async () => {
 			});
 
 		case 'update':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const id = formData.get('id')?.toString();
 				const email = formData.get('email')?.toString();
 				const birthday_date = formData.get('birthday_date')?.toString();
@@ -238,7 +223,7 @@ const getOutput = async () => {
 			});
 
 		case 'password':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const email = formData.get('email')?.toString();
 				const password = formData.get('password')?.toString();
 				const new_password = formData.get('new_password')?.toString();

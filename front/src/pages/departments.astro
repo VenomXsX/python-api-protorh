@@ -4,7 +4,7 @@ import Render from '../components/Render.astro';
 import Code from '../components/Code.astro';
 import { api_url, maxAge } from '../lib/api';
 import Button from '../components/Button.astro';
-import { f, useSession } from '../utils/helper';
+import { f, tc, useSession } from '../utils/helper';
 
 const { token, user } = useSession(Astro);
 // revalidate token
@@ -24,28 +24,13 @@ type Queries =
 
 const q = Astro.url.searchParams.get('q') as Queries;
 
-const tc = async (callback: (formData: FormData) => unknown) => {
-	if (Astro.request.method !== 'POST') return;
-
-	try {
-		const formData = await Astro.request.formData();
-
-		return callback(formData);
-	} catch (error) {
-		if (error instanceof Error) {
-			console.error(error.message);
-			return error.message;
-		}
-	}
-};
-
 const getOutput = async () => {
 	switch (q) {
 		case 'getall':
 			return (await f({ url: `${api_url}/departments` })).data;
 
 		case 'getbyid':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const id = formData.get('id')?.toString();
 				if (!id) return 'Please provide an ID';
 				if (isNaN(Number(id))) return 'Please provide a valid number ID';
@@ -59,7 +44,7 @@ const getOutput = async () => {
 			});
 
 		case 'createDepartment':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const name = formData.get('name')?.toString();
 				if (!name) return 'Please provide a name';
 
@@ -74,7 +59,7 @@ const getOutput = async () => {
 			});
 
 		case 'manageUserDepartment':
-			return await tc(async (formData) => {
+			return await tc(Astro, async (formData) => {
 				const id = formData.get('id')?.toString();
 				const userIds = formData.get('user_ids')?.toString();
 				const method =

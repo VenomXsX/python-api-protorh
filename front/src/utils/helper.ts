@@ -26,7 +26,7 @@ type DataFormat = 'json' | 'text' | 'blob';
 
 const getResponse = async (response: Response, dataFormat: DataFormat) => {
 	if (dataFormat === 'json') return response.json();
-	if (dataFormat === 'text') return response.json();
+	if (dataFormat === 'text') return response.text();
 	if (dataFormat === 'blob') return response.blob();
 };
 
@@ -41,7 +41,9 @@ export const f = async ({
 	url: string;
 	token?: Token;
 	method?: Method;
-	contentType?: 'application/json' | 'multipart/form-data; boundary=---011000010111000001101001';
+	contentType?:
+		| 'application/json'
+		| 'multipart/form-data; boundary=---011000010111000001101001';
 	body?: string | FormData;
 	dataFormat?: DataFormat;
 }) => {
@@ -67,4 +69,22 @@ export const f = async ({
 	const data = await getResponse(response, dataFormat);
 
 	return { data, response };
+};
+
+export const tc = async (
+	Astro: AstroGlobal,
+	callback: (formData: FormData) => unknown
+) => {
+	if (Astro.request.method !== 'POST') return;
+
+	try {
+		const formData = await Astro.request.formData();
+
+		return callback(formData);
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error(error.message);
+			return error.message;
+		}
+	}
 };

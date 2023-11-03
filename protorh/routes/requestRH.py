@@ -62,6 +62,20 @@ def get_rh(id: int, current_user: Annotated[serializers.UserOut, Depends(get_cur
 
 @router.post("/add")
 def add_rh(items: serializers.RequestRHInput, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+    q, _ = make_sql("SELECT", table="users", fields=["id"])
+    user_exist = False
+    with engine.begin() as conn:
+        res: RowMapping = conn.execute(text(q)).mappings().all()
+        for item in res:
+            if item["id"] == items.user_id:
+                user_exist = True
+
+    if not user_exist:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User does not exist, please double check the id"
+        )
+
     q, _ = make_sql("SELECT", table="request_rh")
     user_id_exist = False
     with engine.begin() as conn:
@@ -131,6 +145,27 @@ def add_rh(items: serializers.RequestRHInput, current_user: Annotated[serializer
 
 @router.post("/remove")
 def close_rh(item: serializers.RequestRHId, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
+    # get all
+    q, _ = make_sql(
+        "SELECT",
+        table="request_rh",
+        fields=["id"]
+    )
+    is_exist = False
+    with engine.begin() as conn:
+        res: RowMapping = conn.execute(text(q)).mappings().all()
+        for rh in res:
+            if rh.id == item.id:
+                is_exist = True
+
+    # check if exist
+    if not is_exist:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This RH message does not exist, please double check the id"
+        )
+
+    # update
     q, values = make_sql(
         "UPDATE",
         table="request_rh",
