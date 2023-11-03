@@ -6,7 +6,6 @@ import Select from '../components/Select.astro';
 import Render from '../components/Render.astro';
 import { api_url, maxAge } from '../lib/api';
 import { f, useSession } from '../utils/helper';
-import fs from "fs"
 
 const { token, user } = useSession(Astro);
 // revalidate token
@@ -32,6 +31,8 @@ type Queries =
 const q = Astro.url.searchParams.get('q') as Queries;
 let imageSrc = '';
 
+const disabledMessage = 'Disabled, not working';
+
 const tc = async (callback: (formData: FormData) => unknown) => {
 	if (Astro.request.method !== 'POST') return;
 
@@ -56,48 +57,70 @@ const getOutput = async () => {
 			return (await f({ url: `${api_url}/user/me`, token })).data;
 
 		case 'picture':
-			return await tc(async (formData) => {
-				const id = formData.get('id')?.toString();
-				if (!id) return 'Please provide an ID';
-				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+			return disabledMessage;
+		// return await tc(async (formData) => {
+		// 	const id = formData.get('id')?.toString();
+		// 	if (!id) return 'Please provide an ID';
+		// 	if (isNaN(Number(id))) return 'Please provide a valid number ID';
 
-				const aaa: Blob = (
-					await f({
-						url: `${api_url}/picture/user/${id}`,
-						dataFormat: 'blob',
-					})
-				).data;
+		// 	const aaa: Blob = (
+		// 		await f({
+		// 			url: `${api_url}/picture/user/${id}`,
+		// 			dataFormat: 'blob',
+		// 		})
+		// 	).data;
 
-				console.log('aze');
+		// 	console.log('aze');
 
-				console.log(URL.createObjectURL(aaa));
-				imageSrc = URL.createObjectURL(aaa);
-				return 'ok';
-			});
+		// 	console.log(URL.createObjectURL(aaa));
+		// 	imageSrc = URL.createObjectURL(aaa);
+		// 	return 'ok';
+		// });
 
 		case 'uploadPic':
-			return await tc(async (formData) => {
-				const id = formData.get('id')?.toString();
-				const image = formData.get('image') as File;
-				console.log(image);
+			return disabledMessage;
+		// return await tc(async (formData) => {
+		// 	const id = formData.get('id')?.toString();
+		// 	const image = formData.get('image') as File;
+		// 	console.log(image);
 
-				if (!id) return 'Please provide an ID';
-				if (isNaN(Number(id))) return 'Please provide a valid number ID';
+		// 	// const form = await testForm(Astro.request)
+		// 	// console.log(form);
 
-				URL.createObjectURL(image);
+		// 	// const aaa = parseForm(Astro.request, "./")
 
-				// const file = new File([image as Blob])
-				const body = new FormData();
-				body.append('image', URL.createObjectURL(image));
+		// 	return 'ok';
 
-				return await f({
-					url: `${api_url}/upload/picture/user/${id}`,
-					method: 'POST',
-					contentType:
-						'multipart/form-data; boundary=---011000010111000001101001',
-					body: body,
-				});
-			});
+		// 	// if (!id) return 'Please provide an ID';
+		// 	// if (isNaN(Number(id))) return 'Please provide a valid number ID';
+
+		// 	// URL.createObjectURL(image);
+
+		// 	// const file = new File([image as Blob])
+		// 	// const body = new FormData();
+		// 	// body.append('image', image);
+
+		// 	// const response = await fetch(`${api_url}/upload/picture/user/${id}`, {
+		// 	// 	method: 'POST',
+		// 	// 	headers: {
+		// 	// 		'Content-Disposition': `attachment; filename="${image.name}"`,
+		// 	// 		'Content-Type': 'application/octet-stream',
+		// 	// 	},
+		// 	// 	body: JSON.stringify({image: await Promise.all(async() => {
+		// 	// 		return await image.arrayBuffer()
+		// 	// 	})}),
+		// 	// });
+		// 	// const data = await response.json();
+		// 	// return data;
+
+		// 	// return await f({
+		// 	// 	url: `${api_url}/upload/picture/user/${id}`,
+		// 	// 	method: 'POST',
+		// 	// 	contentType:
+		// 	// 		'multipart/form-data; boundary=---011000010111000001101001',
+		// 	// 	body: body,
+		// 	// });
+		// });
 
 		case 'getbyid':
 			return await tc(async (formData) => {
@@ -284,19 +307,26 @@ const output = await getOutput();
 			<Button type="submit">Delete by id</Button>
 		</form>
 
-		<form action="/users?q=picture" method="post">
-			<Input type="text" name="id" placeholder="User id" />
-			<Button type="submit">Get picture</Button>
+		<form
+			action="/users?q=picture"
+			method="post"
+			class="disabled"
+			title={disabledMessage}
+		>
+			<Input type="text" name="id" placeholder="User id" disabled />
+			<Button type="submit" disabled>Get picture</Button>
 		</form>
 
 		<form
 			action="/users?q=uploadPic"
 			method="post"
 			enctype="multipart/form-data"
+			class="disabled"
+			title={disabledMessage}
 		>
-			<Input type="text" name="id" placeholder="User id" />
-			<Input type="file" name="image" />
-			<Button type="submit">Upload</Button>
+			<Input type="text" name="id" placeholder="User id" disabled />
+			<Input type="file" name="image" disabled />
+			<Button type="submit" disabled>Upload</Button>
 		</form>
 
 		<form class="fields" action="/users?q=password" method="post">
@@ -368,3 +398,10 @@ const output = await getOutput();
 		}
 	</div>
 </Render>
+
+<style>
+	.disabled,
+	.disabled > * {
+		opacity: 0.6;
+	}
+</style>
