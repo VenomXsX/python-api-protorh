@@ -1,3 +1,41 @@
+# ProtoRH front
+
+## Prerequisites
+
+* First need install [Node JS](https://github.com/nodesource/distributions) **version >= 18.14.1**
+
+## Install
+
+Run the following command to install all dependencies (we're using **yarn** for this project)
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+> Make sure you have the correct version of **Node JS**. Then run:
+
+## Start
+
+Then run this to start
+
+```bash
+npm run dev
+# or
+yarn run dev
+# or
+pnpm run dev
+```
+
+> Make sure the **API server** is running
+
+
+
+
+
 # Astro Starter Kit: Basics
 
 ```sh
