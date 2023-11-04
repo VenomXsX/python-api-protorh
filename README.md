@@ -113,3 +113,4 @@ curl  -X GET \
   'http://127.0.0.1:4242/api/picture/user/{user_id}'
 ```
 > flag: `-JO` is to get original filename
+
