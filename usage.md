@@ -83,7 +83,7 @@ Replace `<path_to_file>` and `{user_id}`
 
 ```bash
 $ curl  -X POST \
-	'http://127.0.0.1:4242/api/upload/picture/user/<user_id>' \
+  'http://127.0.0.1:4242/api/upload/picture/user/<user_id>' \
   --form 'image=@<path_to_file>'
 
 # response 200
@@ -160,7 +160,7 @@ $ curl  -X GET \
 
 # response 200
 {
-	<user data>
+  <user data>
 }
 ```
 
@@ -188,7 +188,7 @@ $ curl  -X POST \
 
 # response 200
 {
-	<user data>
+  <user data>
 }
 ```
 
@@ -200,10 +200,10 @@ $ curl  -X POST \
 
 ```bash
 $ curl  -X POST \
-	'http://127.0.0.1:4242/api/user/delete/{user_id}'
+  'http://127.0.0.1:4242/api/user/delete/{user_id}'
 
 # response 200
 {
-	<user data>
+  <user data>
 }
 ```
