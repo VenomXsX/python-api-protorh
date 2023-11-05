@@ -6,13 +6,19 @@
 - [Usage](usage.md)
   - [It works](usage.md#it-works)
   - [Authentication](usage.md#authentication)
+    - [connect](usage.md#connect)
+    - [revalidate](usage.md#revalidate)
   - [User picture](usage.md#user-picture)
+    - [upload picture](usage.md#upload-picture)
+    - [get user's picture](usage.md#get-users-picture)
   - [User data](usage.md#user-data)
     - [get all](usage.md#get-all-users-data)
     - [get me](usage.md#get-me-current-connected-user)
     - [get by id](usage.md#get-user-by-id)
     - [create an user](usage.md#create-an-user)
     - [delete an user by id](usage.md#delete-an-user-by-id)
+    - [update user's data](usage.md#update-users-data)
+    - [update user's password](usage.md#update-users-password)
 
 ## usage
 
@@ -32,6 +38,8 @@ $ curl  -X GET \
 ```
 
 ### Authentication
+
+#### Connect
 
 [Go to summary](#summary)
 
@@ -58,6 +66,8 @@ $ curl  -X POST \
 }
 ```
 
+#### Revalidate
+
 Revalidate token (for front app)
 
 > - Endpoint: `/api/revalidate`
@@ -78,6 +88,8 @@ $ curl  -X GET \
 
 ### User picture
 
+#### upload picture
+
 [Go to summary](#summary)
 
 **Upload an image**, only accept `png`, `jpeg` and `gif`. \
@@ -97,6 +109,10 @@ $ curl  -X POST \
   "message": "picture uploaded"
 }
 ```
+
+#### get user's picture
+
+[Go to summary](#summary)
 
 **Get user's image** \
 Replace `{user_id}`
@@ -211,7 +227,7 @@ $ curl  -X POST \
 
 [Go to summary](#summary)
 
-Replace {user_id}
+Replace `{user_id}`
 
 > - Endpoint: `/api/user/delete/{user_id}`
 > - Method: `DELETE`
@@ -225,4 +241,64 @@ $ curl  -X POST \
 {
   <user data>
 }
+```
+
+#### **Update** user's data
+
+update a specific user column(s) \
+for this example we update only `firstname`
+
+[Go to summary](#summary)
+
+Replace `{user_id}`
+
+> - Endpoint: `/api/user/update/{user_id}`
+> - Method: `PATCH`
+> - JWT Required: `true`
+
+```bash
+curl  -X PATCH \
+  'http://127.0.0.1:4242/api/user/update/7' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+  "firstname": "first test up"
+}'
+
+# response 200
+{
+  "message": "Successfully updated, id: 7",
+  "data": {
+    "id": "7",
+    "firstname": "first test up"
+  }
+}
+```
+
+#### **Update** user's password
+
+update password for specific user
+
+[Go to summary](#summary)
+
+Replace `{user_id}`
+
+> - Endpoint: `/api/user/password`
+> - Method: `PATCH`
+> - JWT Required: `false`
+
+```bash
+curl  -X PATCH \
+  'http://127.0.0.1:4242/api/user/password' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+  "email": "test@test.test",
+  "password": "test",
+  "new_password": "newtest",
+  "repeat_new_password": "newtest"
+}'
+
+# response 200
+"User's password has been updated"
 ```
