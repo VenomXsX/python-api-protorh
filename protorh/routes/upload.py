@@ -105,6 +105,6 @@ async def upload_pic(id, image: UploadFile = File()):
         os.makedirs(path)
 
     # save file with token as filename
-    image_load.save(f"{path}/{user['token']}.{image.filename.split('.')[-1]}")
+    image_load.save(f"{path}/{user['token']}.{image.filename.split('.')[-1]}", save_all=True)
 
     return {"message": "picture uploaded"}
