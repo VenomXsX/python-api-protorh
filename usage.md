@@ -7,6 +7,12 @@
   - [It works](usage.md#it-works)
   - [Authentication](usage.md#authentication)
   - [User picture](usage.md#user-picture)
+  - [User data](usage.md#user-data)
+    - [get all](usage.md#get-all-users-data)
+    - [get me](usage.md#get-me-current-connected-user)
+    - [get by id](usage.md#get-user-by-id)
+    - [create an user](usage.md#create-an-user)
+    - [delete an user by id](usage.md#delete-an-user-by-id)
 
 ## usage
 
@@ -111,7 +117,9 @@ curl  -X GET \
 
 ### user data
 
-Get **all users data**
+#### Get **all users data**
+
+[Go to summary](#summary)
 
 > - Endpoint: `/api/user`
 > - Method: `GET`
@@ -123,13 +131,15 @@ $ curl  -X GET \
 
 # response 200
 [
-	{ <user data> },
-	{ <user data> },
-	...
+  { <user data> },
+  { <user data> },
+  ...
 ]
 ```
 
-Get **me** (current connected user)
+#### Get **me** (current connected user)
+
+[Go to summary](#summary)
 
 > - Endpoint: `/api/user/me`
 > - Method: `GET`
@@ -142,11 +152,14 @@ $ curl  -X GET \
 
 # response 200
 {
-	<current user data>
+  <current user data>
 }
 ```
 
-Get **user by id** \
+#### Get **user by id**
+
+[Go to summary](#summary)
+
 Replace `{user_id}`
 
 > - Endpoint: `/api/user/{user_id}`
@@ -164,7 +177,9 @@ $ curl  -X GET \
 }
 ```
 
-**Create** an user
+#### **Create** an user
+
+[Go to summary](#summary)
 
 > - Endpoint: `/api/user/create`
 > - Method: `POST`
@@ -192,7 +207,11 @@ $ curl  -X POST \
 }
 ```
 
-**Delete** an user by id
+#### **Delete** an user by id
+
+[Go to summary](#summary)
+
+Replace {user_id}
 
 > - Endpoint: `/api/user/delete/{user_id}`
 > - Method: `DELETE`
