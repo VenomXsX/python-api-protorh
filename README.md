@@ -8,7 +8,19 @@ Groupe de **PHAN** et **ZHU**
 - [Usage](usage.md)
   - [It works](usage.md#it-works)
   - [Authentication](usage.md#authentication)
+    - [connect](usage.md#connect)
+    - [revalidate](usage.md#revalidate)
   - [User picture](usage.md#user-picture)
+    - [upload picture](usage.md#upload-picture)
+    - [get user's picture](usage.md#get-users-picture)
+  - [User data](usage.md#user-data)
+    - [get all](usage.md#get-all-users-data)
+    - [get me](usage.md#get-me-current-connected-user)
+    - [get by id](usage.md#get-user-by-id)
+    - [create an user](usage.md#create-an-user)
+    - [delete an user by id](usage.md#delete-an-user-by-id)
+    - [update user's data](usage.md#update-users-data)
+    - [update user's password](usage.md#update-users-password)
 
 ## File organization
 
