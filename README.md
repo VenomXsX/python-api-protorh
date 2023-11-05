@@ -2,14 +2,13 @@
 
 Groupe de **PHAN** et **ZHU**
 
-
 ## Summary
 
-* [File organization](#file-organization)
-* [Usage](#usage)
-  * [Upload picture to user](#upload-picture-to-user)
-  * [get user picture](#get-user-picture)
-
+- [File organization](README.md#file-organization)
+- [Usage](usage.md)
+  - [It works](usage.md#it-works)
+  - [Authentication](usage.md#authentication)
+  - [User picture](usage.md#user-picture)
 
 ## File organization
 
@@ -79,38 +78,3 @@ Groupe de **PHAN** et **ZHU**
 ├── requirements.txt
 └── run.sh
 ```
-
-## usage
-
-### Upload picture to user
-
-[Go to summary](#summary)
-
-replace `<path_to_file>` and `{user_id}`
-
->- Endpoint: `/api/upload/picture/user/{user_id}`
->- Method: `POST`
-
-
-```bash
-curl  -X POST \
-  'http://127.0.0.1:4242/api/upload/picture/user/<user_id>' \
-  --form 'image=@<path_to_file>'
-```
-
-### get user picture
-
-[Go to summary](#summary)
-
-Replace `{user_id}`
-
->- Endpoint: `/api/picture/user/{user_id}`
->- Method: `GET`
-
-```bash
-curl  -X GET \
-  --JO \
-  'http://127.0.0.1:4242/api/picture/user/{user_id}'
-```
-> flag: `-JO` is to get original filename
-
