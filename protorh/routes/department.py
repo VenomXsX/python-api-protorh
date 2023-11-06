@@ -36,7 +36,7 @@ async def get_all():
 # JWT required : False
 # create a department
 @router.post("/")
-async def get_all(items: serializers.DepartmentRequired):
+async def create(items: serializers.DepartmentRequired):
     q, values = make_sql(
         "CREATE",
         table="department",

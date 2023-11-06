@@ -86,7 +86,7 @@ $ curl  -X GET \
 }
 ```
 
-### User picture
+### User management
 
 #### upload picture
 
@@ -193,7 +193,7 @@ $ curl  -X GET \
 }
 ```
 
-#### **Create** an user
+#### **Create** a user
 
 [Go to summary](#summary)
 
@@ -301,4 +301,133 @@ curl  -X PATCH \
 
 # response 200
 "User's password has been updated"
+```
+### Department management
+
+#### Get all
+
+[Go to summary](#summary)
+
+gets all departments
+
+> - Endpoint: `/api/departments`
+> - Method: `GET`
+> - JWT Required: `false`
+
+```bash
+$ curl --request GET \
+  --url http://127.0.0.1:4242/api/departments \
+
+# response 200
+[
+  {
+    "id": 1,
+    "name": "somewhere"
+  },
+  ...
+]
+
+# response 404
+{
+	"detail": "There's no departments"
+}
+```
+
+#### Create a department
+
+[Go to summary](#summary)
+
+Create a department
+
+> - Endpoint: `/api/departments`
+> - Method: `POST`
+> - JWT Required: `false`
+
+```bash
+$ curl --request POST \
+  --url http://127.0.0.1:4242/api/departments \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"name": "<departname>"
+}'
+
+# response 200
+{
+	"message": "Successfully added: <departname>"
+}
+
+# response 500
+{
+	"detail": "Something went wrong, please retry"
+}
+```
+#### Get all users from a department
+
+[Go to summary](#summary)
+
+Get all users using department id
+
+> - Endpoint: `/api/departments/{department_id}/users`
+> - Method: `GET`
+> - JWT Required: `True`
+
+```bash
+$ curl --request GET \
+  --url http://127.0.0.1:4242/api/departments/9/users \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' 
+
+# response 200
+[
+	{
+		<user informations>
+	},
+  ...
+]
+
+# response 404
+{
+	"detail": "No department or user assigned"
+}
+```
+
+#### Add users to department
+
+[Go to summary](#summary)
+
+Add users to a department
+
+> - Endpoint: `/api/departments/{department_id}/users/add`
+> - Method: `POST`
+> - JWT Required: `True`
+
+```bash
+$ curl --request POST \
+  --url http://127.0.0.1:4242/api/departments/{department_id}/users/add \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[<id>,...]'
+
+# response 200
+"updated successfully, <rowcount> affected"
+```
+#### Remove user
+
+[Go to summary](#summary)
+
+Remove users from department
+
+> - Endpoint: `/api/departments/{department_id}/users/remove`
+> - Method: `POST`
+> - JWT Required: `True`
+
+```bash
+$ curl --request POST \
+  --url http://localhost:4242/api/departments/9/users/remove \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[<id>,...]'
+
+# response 200
+"updated successfully, <rowcount> affected"
 ```
