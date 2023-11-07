@@ -111,6 +111,8 @@ async def create(items: serializers.CreateUser):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Something went wrong, please retry"
             )
+    # remove password in output (comment for test)
+    # values["password"] = None
     return values
 
 

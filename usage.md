@@ -141,7 +141,7 @@ Replace `{user_id}`
 > - JWT Required: `false`
 
 ```bash
-curl  -X GET \
+$ curl  -X GET \
   --JO 'http://127.0.0.1:4242/api/picture/user/{user_id}'
 
 # response 200
@@ -162,7 +162,7 @@ curl  -X GET \
 
 ```bash
 $ curl  -X GET \
-  'http://127.0.0.1:4242/api/user'
+  'http://127.0.0.1:4242/api/user/'
 
 # response 200
 [
@@ -223,7 +223,6 @@ $ curl  -X GET \
 ```bash
 $ curl  -X POST \
   'http://127.0.0.1:4242/api/user/create' \
-  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data-raw '{
   "email": "test@test.test",
@@ -253,7 +252,7 @@ Replace `{user_id}`
 > - JWT Required: `false`
 
 ```bash
-$ curl  -X POST \
+$ curl  -X DELETE \
   'http://127.0.0.1:4242/api/user/delete/{user_id}'
 
 # response 200
@@ -276,12 +275,12 @@ Replace `{user_id}`
 > - JWT Required: `true`
 
 ```bash
-curl  -X PATCH \
+$ curl  -X PATCH \
   'http://127.0.0.1:4242/api/user/update/7' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data-raw '{
-  "firstname": "first test up"
+  "firstname": "first test updated"
 }'
 
 # response 200
@@ -307,7 +306,7 @@ Replace `{user_id}`
 > - JWT Required: `false`
 
 ```bash
-curl  -X PATCH \
+$ curl  -X PATCH \
   'http://127.0.0.1:4242/api/user/password' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \

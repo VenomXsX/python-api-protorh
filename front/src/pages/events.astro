@@ -14,7 +14,7 @@ if (user !== null) {
 		token,
 	});
 	Astro.cookies.set('session', { token: data, user }, { maxAge });
-} else return Astro.redirect('/?noperm');
+}
 
 type Queries =
 	| 'getall'
