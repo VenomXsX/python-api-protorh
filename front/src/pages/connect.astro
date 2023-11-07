@@ -4,35 +4,35 @@ import Code from '../components/Code.astro';
 import { api_url, maxAge } from '../lib/api';
 import Input from '../components/Input.astro';
 import Button from '../components/Button.astro';
-import { f } from '../utils/helper';
+import { f, tc } from '../utils/helper';
 
 const connect = async () => {
-	const formData = await Astro.request.formData();
-	const email = formData.get('email')?.toString();
-	const password = formData.get('password')?.toString();
+	return (await tc(Astro, async (formData) => {
+		const email = formData.get('email')?.toString();
+		const password = formData.get('password')?.toString();
 
-	if (!email || !password) return 'Please fill email and password';
+		if (!email || !password) return 'Please fill email and password';
 
-	const body = { email, password };
-	const { data, response } = await f({
-		url: `${api_url}/connect`,
-		contentType: 'application/json',
-		method: 'POST',
-		body: JSON.stringify(body),
-	});
+		const body = { email, password };
 
-	if (response.status === 401) {
-		return response.json();
-	}
+		const { data, response } = await f({
+			url: `${api_url}/connect`,
+			contentType: 'application/json',
+			method: 'POST',
+			body: JSON.stringify(body),
+		});
 
-	const { data: user } = await f({
-		url: `${api_url}/user/me`,
-		token: data,
-	});
+		if (response.status === 401) return data.detail;
 
-	Astro.cookies.set('session', { token: data, user }, { maxAge });
+		const { data: user } = await f({
+			url: `${api_url}/user/me`,
+			token: data,
+		});
 
-	return 'connected';
+		Astro.cookies.set('session', { token: data, user }, { maxAge });
+
+		return 'connected';
+	})) as string;
 };
 
 let output: string | null = 'No output';
