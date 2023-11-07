@@ -11,7 +11,10 @@ router = APIRouter(
     tags=['connect']
 )
 
-
+# Endpoint : /revalidate
+# Type : GET
+# JWT required : True
+# revalidate token, send new token (for front app)
 @router.get("/revalidate")
 async def revalidate(new_token: Annotated[str, Depends(check_token)]):
     return {
@@ -20,6 +23,10 @@ async def revalidate(new_token: Annotated[str, Depends(check_token)]):
     }
 
 
+# Endpoint : /connect
+# Type : POST
+# JWT required : False
+# connect user with email and password
 @router.post("/connect")
 async def connect(form_data: serializers.FormData):
     INVALID_EMAIL_OR_PASS = HTTPException(
@@ -43,6 +50,7 @@ async def connect(form_data: serializers.FormData):
     }
 
 
+# update user age on connection
 async def update_age(user: dict[serializers.UserOut, None]):
     items = user.copy()
     items["age"] = calc_age(formatStringToDate(items["birthday_date"]))

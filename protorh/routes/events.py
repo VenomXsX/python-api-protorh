@@ -13,6 +13,10 @@ router = APIRouter(
 db = SessionLocal()
 
 
+# Endpoint : /events
+# Type : GET
+# JWT required : False
+# get all events
 @router.get("/")
 def GetEventAll():
     q, _ = make_sql("SELECT", table="event")
@@ -25,6 +29,10 @@ def GetEventAll():
     )
 
 
+# Endpoint : /events
+# Type : GET
+# JWT required : False
+# get event by id
 @router.get("/{id}")
 def GetEvent(id):
     q, values = make_sql("SELECT", table="event", id=id)
@@ -37,6 +45,10 @@ def GetEvent(id):
     return response(200, "Event found. id: " + id, data=res[0])
 
 
+# Endpoint : /events/create
+# Type : POST
+# JWT required : False
+# create an event
 @router.post("/create")
 def Create(items: serializers.EventRequired):
     q, values = make_sql(
@@ -63,6 +75,10 @@ def Create(items: serializers.EventRequired):
     return response(200, "Successfully addded", data=values, res=res)
 
 
+# Endpoint : /events/{event_id}
+# Type : DELETE
+# JWT required : False
+# delete an event
 @router.delete("/{id}")
 def Delete(id):
     q, values = make_sql(
@@ -81,6 +97,10 @@ def Delete(id):
     return response(200, "Sucessfully deleted, id: " + id, res=res)
 
 
+# Endpoint : /events/{event_id}
+# Type : PATCH
+# JWT required : False
+# update an event by id
 @router.patch("/{id}")
 def Update(id, items: serializers.EventOptional):
     q, values = make_sql(
@@ -114,6 +134,10 @@ def Update(id, items: serializers.EventOptional):
     )
 
 
+# Endpoint : /events/{event_id}
+# Type : PUT
+# JWT required : False
+# update an event or create new one
 @router.put("/{id}")
 def UpdateOrCreate(id, items: serializers.EventRequired):
     q, values = make_sql(

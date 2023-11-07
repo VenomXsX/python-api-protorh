@@ -16,6 +16,11 @@ router = APIRouter(
     tags=["request"]
 )
 
+# Endpoint : /rh/msg
+# Type : GET
+# JWT required : True
+# get all rh message
+
 
 @router.get("/")
 def get_all_rh(current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
@@ -38,6 +43,10 @@ def get_all_rh(current_user: Annotated[serializers.UserOut, Depends(get_current_
     return res
 
 
+# Endpoint : /rh/msg/{rh_id}
+# Type : GET
+# JWT required : True
+# get rh message by id
 @router.get("/{id}")
 def get_rh(id: int, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     if not current_user.role in ["admin", "manager"]:
@@ -60,6 +69,10 @@ def get_rh(id: int, current_user: Annotated[serializers.UserOut, Depends(get_cur
     return res[0]
 
 
+# Endpoint : /rh/msg/add
+# Type : POST
+# JWT required : True
+# add new rh message if not already exist (not closed)
 @router.post("/add")
 def add_rh(items: serializers.RequestRHInput, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     q, _ = make_sql("SELECT", table="users", fields=["id"])
@@ -143,6 +156,10 @@ def add_rh(items: serializers.RequestRHInput, current_user: Annotated[serializer
     }
 
 
+# Endpoint : /rh/msg/remove
+# Type : POST
+# JWT required : True
+# close a rh message (linked with user)
 @router.post("/remove")
 def close_rh(item: serializers.RequestRHId, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     # get all
@@ -195,6 +212,10 @@ def close_rh(item: serializers.RequestRHId, current_user: Annotated[serializers.
     }
 
 
+# Endpoint : /rh/msg/update
+# Type : POST
+# JWT required : True
+# update rh message (linked with user)
 @router.post("/update")
 def Update(items: serializers.RequestRHInput, current_user: Annotated[serializers.UserOut, Depends(get_current_user)]):
     q = text("SELECT id, content_history FROM request_rh WHERE user_id = :id")

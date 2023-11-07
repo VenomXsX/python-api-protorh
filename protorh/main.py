@@ -36,7 +36,7 @@ app = FastAPI(
     title="Our Amazing API",
     description=description,
     summary="This is our API project in Python3",
-    version="0.0.1",
+    version="1.0.1",
     # terms_of_service="http://example.com/terms/",
     # contact={
     #     "name": "Deadpoolio the Amazing",

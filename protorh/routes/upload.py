@@ -53,7 +53,7 @@ async def get_pic(id):
 # JWT required : False
 # upload a picture and assign to user
 @router.post("/upload/picture/user/{id}")
-async def upload_pic(id, image: UploadFile = File(...)):
+async def upload_pic(id, image: UploadFile = File()):
     if not image:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -105,6 +105,6 @@ async def upload_pic(id, image: UploadFile = File(...)):
         os.makedirs(path)
 
     # save file with token as filename
-    image_load.save(f"{path}/{user['token']}.{image.filename.split('.')[-1]}")
+    image_load.save(f"{path}/{user['token']}.{image.filename.split('.')[-1]}", save_all=True)
 
     return {"message": "picture uploaded"}

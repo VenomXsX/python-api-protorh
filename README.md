@@ -2,14 +2,25 @@
 
 Groupe de **PHAN** et **ZHU**
 
-
 ## Summary
 
-* [File organization](#file-organization)
-* [Usage](#usage)
-  * [Upload picture to user](#upload-picture-to-user)
-  * [get user picture](#get-user-picture)
-
+- [File organization](README.md#file-organization)
+- [Usage](usage.md)
+  - [It works](usage.md#it-works)
+  - [Authentication](usage.md#authentication)
+    - [connect](usage.md#connect)
+    - [revalidate](usage.md#revalidate)
+  - [User picture](usage.md#user-picture)
+    - [upload picture](usage.md#upload-picture)
+    - [get user's picture](usage.md#get-users-picture)
+  - [User data](usage.md#user-data)
+    - [get all](usage.md#get-all-users-data)
+    - [get me](usage.md#get-me-current-connected-user)
+    - [get by id](usage.md#get-user-by-id)
+    - [create an user](usage.md#create-an-user)
+    - [delete an user by id](usage.md#delete-an-user-by-id)
+    - [update user's data](usage.md#update-users-data)
+    - [update user's password](usage.md#update-users-password)
 
 ## File organization
 
@@ -79,38 +90,3 @@ Groupe de **PHAN** et **ZHU**
 ├── requirements.txt
 └── run.sh
 ```
-
-## usage
-
-### Upload picture to user
-
-[Go to summary](#summary)
-
-replace `<path_to_file>` and `{user_id}`
-
->- Endpoint: `/api/upload/picture/user/{user_id}`
->- Method: `POST`
-
-
-```bash
-curl  -X POST \
-  'http://127.0.0.1:4242/api/upload/picture/user/<user_id>' \
-  --form 'image=@<path_to_file>'
-```
-
-### get user picture
-
-[Go to summary](#summary)
-
-Replace `{user_id}`
-
->- Endpoint: `/api/picture/user/{user_id}`
->- Method: `GET`
-
-```bash
-curl  -X GET \
-  --JO \
-  'http://127.0.0.1:4242/api/picture/user/{user_id}'
-```
-> flag: `-JO` is to get original filename
-
