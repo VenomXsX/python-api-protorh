@@ -617,7 +617,6 @@ Update or create an event
 ```bash
 $ curl --request PATCH \
   --url http://localhost:4242/api/events/{id} \
-  --header 'Authorization: Bearer <token> \
   --header 'Content-Type: application/json' \
   --data '{
   "name": "string",
@@ -643,4 +642,144 @@ $ curl --request PATCH \
     }
   ]
 }
+```
+
+### Requests management
+
+#### Get all requests
+
+[Go to summary](#summary)
+
+Get all requests
+
+> - Endpoint: `/api/rh/msg`
+> - Method: `GET`
+> - JWT Required: `false`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/rh/msg \
+  --header 'Content-Type: application/json' \
+
+# response 200
+"string"
+```
+
+#### Get request by ID
+
+[Go to summary](#summary)
+
+Get request by ID
+
+> - Endpoint: `/api/rh/msg/{id}`
+> - Method: `GET`
+> - JWT Required: `True`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/rh/msg \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json'
+
+# response 200
+"string"
+```
+
+#### Add a request
+
+[Go to summary](#summary)
+
+Add a request
+
+> - Endpoint: `/api/rh/msg/add`
+> - Method: `POST`
+> - JWT Required: `true`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/rh/msg \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "user_id": 0,
+  "content": "string",
+  "registration_date": "2023-11-07",
+  "visibility": true,
+  "close": true,
+  "last_action": "2023-11-07",
+  "content_history": [
+    {}
+  ]
+}'
+
+# response 200
+"string"
+
+# response 422
+{
+  "detail": [
+    {
+      "loc": [
+        "string",
+        0
+      ],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
+```
+
+#### Close a request
+
+[Go to summary](#summary)
+
+Close a request by its ID
+
+> - Endpoint: `/api/rh/msg/remove`
+> - Method: `POST`
+> - JWT Required: `True`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/rh/msg \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "id": 0
+  }'
+
+# response 200
+"string"
+```
+
+#### Update a request
+
+[Go to summary](#summary)
+
+Update a request
+
+> - Endpoint: `/api/rh/msg/remove`
+> - Method: `POST`
+> - JWT Required: `True`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/rh/msg \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "user_id": 0,
+  "content": "string",
+  "registration_date": "2023-11-07",
+  "visibility": true,
+  "close": true,
+  "last_action": "2023-11-07",
+  "content_history": [
+    {}
+  ]
+}'
+
+# response 200
+"string"
 ```
