@@ -349,7 +349,7 @@ $ curl --request GET \
 
 # response 404
 {
-	"detail": "There's no departments"
+  "detail": "There's no departments"
 }
 ```
 
@@ -373,12 +373,12 @@ $ curl --request POST \
 
 # response 200
 {
-	"message": "Successfully added: <departname>"
+  "message": "Successfully added: <departname>"
 }
 
 # response 500
 {
-	"detail": "Something went wrong, please retry"
+  "detail": "Something went wrong, please retry"
 }
 ```
 
@@ -400,15 +400,15 @@ $ curl --request GET \
 
 # response 200
 [
-	{
-		<user informations>
-	},
+  {
+    <user informations>
+  },
   ...
 ]
 
 # response 404
 {
-	"detail": "No department or user assigned"
+  "detail": "No department or user assigned"
 }
 ```
 
