@@ -38,6 +38,7 @@
     - [Add a request](usage.md#add-a-request)
     - [Close a request](usage.md#close-a-request)
     - [Update a request](usage.md#update-a-request)
+- [Demo](demo.md)
 
 ## usage
 
