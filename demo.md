@@ -31,11 +31,9 @@ curl  -X GET \
 
 ## Update user
 
-change {id}
-
 ```bash
 curl  -X PATCH \
-  'http://127.0.0.1:4242/api/user/update/{id}' \
+  'http://127.0.0.1:4242/api/user/update/14' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -58,9 +56,7 @@ curl  -X POST \
 
 ## Delete user
 
-change {id}
-
 ```bash
 curl  -X DELETE \
-  'http://127.0.0.1:4242/api/user/delete/{id}'
+  'http://127.0.0.1:4242/api/user/delete/14'
 ```
