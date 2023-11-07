@@ -702,32 +702,11 @@ $ curl --request GET \
   --header 'Content-Type: application/json' \
   --data '{
   "user_id": 0,
-  "content": "string",
-  "registration_date": "2023-11-07",
-  "visibility": true,
-  "close": true,
-  "last_action": "2023-11-07",
-  "content_history": [
-    {}
-  ]
+  "content": "string"
 }'
 
 # response 200
 "string"
-
-# response 422
-{
-  "detail": [
-    {
-      "loc": [
-        "string",
-        0
-      ],
-      "msg": "string",
-      "type": "string"
-    }
-  ]
-}
 ```
 
 #### Close a request
@@ -770,14 +749,7 @@ $ curl --request GET \
   --header 'Content-Type: application/json' \
   --data '{
   "user_id": 0,
-  "content": "string",
-  "registration_date": "2023-11-07",
-  "visibility": true,
-  "close": true,
-  "last_action": "2023-11-07",
-  "content_history": [
-    {}
-  ]
+  "content": "string"
 }'
 
 # response 200
