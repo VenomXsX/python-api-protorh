@@ -302,6 +302,7 @@ curl  -X PATCH \
 # response 200
 "User's password has been updated"
 ```
+
 ### Department management
 
 #### Get all
@@ -361,6 +362,7 @@ $ curl --request POST \
 	"detail": "Something went wrong, please retry"
 }
 ```
+
 #### Get all users from a department
 
 [Go to summary](#summary)
@@ -375,7 +377,7 @@ Get all users using department id
 $ curl --request GET \
   --url http://127.0.0.1:4242/api/departments/9/users \
   --header 'Authorization: Bearer <token>' \
-  --header 'Content-Type: application/json' 
+  --header 'Content-Type: application/json'
 
 # response 200
 [
@@ -411,6 +413,7 @@ $ curl --request POST \
 # response 200
 "updated successfully, <rowcount> affected"
 ```
+
 #### Remove user
 
 [Go to summary](#summary)
@@ -430,4 +433,214 @@ $ curl --request POST \
 
 # response 200
 "updated successfully, <rowcount> affected"
+```
+
+### Events management
+
+#### Get all events
+
+[Go to summary](#summary)
+
+Get all events
+
+> - Endpoint: `/api/events/`
+> - Method: `GET`
+> - JWT Required: `false`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/events \
+  --header 'Content-Type: application/json' \
+
+# response 200
+"string"
+```
+
+#### Get event by id
+
+[Go to summary](#summary)
+
+Get event by their ID
+
+> - Endpoint: `/api/events/{id}`
+> - Method: `GET`
+> - JWT Required: `false`
+
+```bash
+$ curl --request GET \
+  --url http://localhost:4242/api/events \
+  --header 'Content-Type: application/json' \
+
+# response 200
+"string"
+
+# response 422
+{
+  "detail": [
+    {
+      "loc": [
+        "string",
+        0
+      ],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
+```
+
+#### Delete event by id
+
+[Go to summary](#summary)
+
+Delete an event by uts ID
+
+> - Endpoint: `/api/events/{id}`
+> - Method: `DELETE`
+> - JWT Required: `false`
+
+```bash
+$ curl --request DELETE \
+  --url http://localhost:4242/api/events \
+  --header 'Content-Type: application/json' \
+
+# response 200
+"string"
+
+# response 422
+{
+  "detail": [
+    {
+      "loc": [
+        "string",
+        0
+      ],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
+```
+
+#### Update event
+
+[Go to summary](#summary)
+
+Update an event by its ID
+
+> - Endpoint: `/api/events/{id}`
+> - Method: `PATCH`
+> - JWT Required: `false`
+
+```bash
+$ curl --request PATCH \
+  --url http://localhost:4242/api/events/{id} \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "name": "string",
+  "date": "2023-11-07",
+  "description": "string",
+  "user_id": 0,
+  "department_id": 0
+}'
+
+# response 200
+"string"
+
+# response 422
+{
+  "detail": [
+    {
+      "loc": [
+        "string",
+        0
+      ],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
+```
+
+#### Create event
+
+[Go to summary](#summary)
+
+Create an event
+
+> - Endpoint: `/api/events/create`
+> - Method: `POST`
+> - JWT Required: `false`
+
+```bash
+$ curl --request PATCH \
+  --url http://localhost:4242/api/events/create \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "name": "string",
+  "date": "2023-11-07",
+  "description": "string",
+  "user_id": 0,
+  "department_id": 0
+}'
+
+# response 200
+"string"
+
+# response 422
+{
+  "detail": [
+    {
+      "loc": [
+        "string",
+        0
+      ],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
+```
+
+#### Update or Create an event
+
+[Go to summary](#summary)
+
+Update or create an event
+
+> - Endpoint: `/api/events/{id}`
+> - Method: `PUT`
+> - JWT Required: `false`
+
+```bash
+$ curl --request PATCH \
+  --url http://localhost:4242/api/events/{id} \
+  --header 'Authorization: Bearer <token> \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "name": "string",
+  "date": "2023-11-07",
+  "description": "string",
+  "user_id": 0,
+  "department_id": 0
+}'
+
+# response 200
+"string"
+
+# response 422
+{
+  "detail": [
+    {
+      "loc": [
+        "string",
+        0
+      ],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
 ```
