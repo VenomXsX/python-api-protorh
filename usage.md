@@ -472,7 +472,17 @@ $ curl --request GET \
   --header 'Content-Type: application/json' \
 
 # response 200
-"string"
+{
+  "res": null,
+  "status": 200,
+  "message": "Events found",
+  "data": [
+    {
+      <event>,
+      <event>,
+    }
+  ]
+}
 ```
 
 #### Get event by id
@@ -491,7 +501,14 @@ $ curl --request GET \
   --header 'Content-Type: application/json' \
 
 # response 200
-"string"
+{
+  "res": null,
+  "status": 200,
+  "message": "Event found. id: 7",
+  "data": {
+    <event>
+  }
+}
 
 # response 422
 {
@@ -524,7 +541,15 @@ $ curl --request DELETE \
   --header 'Content-Type: application/json' \
 
 # response 200
-"string"
+{
+  "res": {
+    "rowcount": 1,
+    "_soft_closed": true
+  },
+  "status": 200,
+  "message": "Sucessfully deleted, id: <id>",
+  "data": null
+}
 
 # response 422
 {
@@ -554,7 +579,7 @@ Update an event by its ID
 ```bash
 $ curl --request PATCH \
   --url http://localhost:4242/api/events/{id} \
-  --header 'Authorization: Bearer <token> \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
   "name": "string",
@@ -565,7 +590,22 @@ $ curl --request PATCH \
 }'
 
 # response 200
-"string"
+{
+  "res": {
+    "rowcount": 1,
+    "_soft_closed": true
+  },
+  "status": 200,
+  "message": "Successfully updated, id: <id>",
+  "data": {
+    "id": 0,
+    "name": "string",
+    "date": "2020-10-10",
+    "description": "string",
+    "user_id": 0,
+    "department_id": 0
+  }
+}
 
 # response 422
 {
@@ -595,7 +635,7 @@ Create an event
 ```bash
 $ curl --request PATCH \
   --url http://localhost:4242/api/events/create \
-  --header 'Authorization: Bearer <token> \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
   "name": "string",
@@ -606,7 +646,21 @@ $ curl --request PATCH \
 }'
 
 # response 200
-"string"
+{
+  "res": {
+    "rowcount": 1,
+    "_soft_closed": true
+  },
+  "status": 200,
+  "message": "Successfully addded",
+  "data": {
+    "name": "string",
+    "date": "2020-10-10",
+    "description": "string",
+    "user_id": 0,
+    "department_id": 0
+  }
+}
 
 # response 422
 {
@@ -645,8 +699,40 @@ $ curl --request PATCH \
   "department_id": 0
 }'
 
-# response 200
-"string"
+# response 200 (if already exist)
+{
+  "res": {
+    "rowcount": 1,
+    "_soft_closed": true
+  },
+  "status": 200,
+  "message": "Successfully updated, id: <id>",
+  "data": {
+    "id": 0,
+    "name": "string",
+    "date": "2020-10-10",
+    "description": "string",
+    "user_id": 0,
+    "department_id": 0
+  }
+}
+
+# response 200 (if not exist)
+{
+  "res": {
+    "rowcount": 1,
+    "_soft_closed": true
+  },
+  "status": 200,
+  "message": "Successfully addded",
+  "data": {
+    "name": "string",
+    "date": "2020-10-10",
+    "description": "string",
+    "user_id": 0,
+    "department_id": 0
+  }
+}
 
 # response 422
 {
@@ -673,7 +759,7 @@ Get all requests
 
 > - Endpoint: `/api/rh/msg`
 > - Method: `GET`
-> - JWT Required: `false`
+> - JWT Required: `true`
 
 ```bash
 $ curl --request GET \
@@ -681,7 +767,11 @@ $ curl --request GET \
   --header 'Content-Type: application/json' \
 
 # response 200
-"string"
+[
+  { <rh msg data> },
+  { <rh msg data> },
+  ...
+]
 ```
 
 #### Get request by ID
@@ -697,11 +787,13 @@ Get request by ID
 ```bash
 $ curl --request GET \
   --url http://localhost:4242/api/rh/msg \
-  --header 'Authorization: Bearer <token> \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json'
 
 # response 200
-"string"
+{
+  <rh msg data>
+}
 ```
 
 #### Add a request
@@ -717,7 +809,7 @@ Add a request
 ```bash
 $ curl --request GET \
   --url http://localhost:4242/api/rh/msg \
-  --header 'Authorization: Bearer <token> \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
   "user_id": 0,
@@ -725,7 +817,19 @@ $ curl --request GET \
 }'
 
 # response 200
-"string"
+{
+  "message": "Successfully addded",
+  "data": {
+    "user_id": 0,
+    "content": "string",
+    "visibility": true,
+    "close": false,
+    "last_action": "2023-11-07",
+    "content_history": [
+      "{\"author\": 0, \"content\": \"string\", \"date\": \"2023-11-07\"}"
+    ]
+  }
+}
 ```
 
 #### Close a request
@@ -741,14 +845,16 @@ Close a request by its ID
 ```bash
 $ curl --request GET \
   --url http://localhost:4242/api/rh/msg \
-  --header 'Authorization: Bearer <token> \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
     "id": 0
   }'
 
 # response 200
-"string"
+{
+  "message": "Sucessfully closed, id: <id>"
+}
 ```
 
 #### Update a request
@@ -764,7 +870,7 @@ Update a request
 ```bash
 $ curl --request GET \
   --url http://localhost:4242/api/rh/msg \
-  --header 'Authorization: Bearer <token> \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
   "user_id": 0,
@@ -772,5 +878,7 @@ $ curl --request GET \
 }'
 
 # response 200
-"string"
+{
+  "message": "Successfully updated, id: <id>"
+}
 ```
