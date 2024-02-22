@@ -1,7 +1,5 @@
 # ProtoRH project
 
-Groupe de **PHAN** et **ZHU**
-
 ## Summary
 
 - [File organization](README.md#file-organization)
